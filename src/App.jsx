@@ -42,7 +42,7 @@ const messages = [
   {
       id: 6, 
       user: "Jane Smith",
-      content: "Wszystko w porządku, właśnie kończę projekt. A u Ciebie?",
+      content: "Wszystko w porządku, właśnie kończę projekt. A u Ciebie asdasdasdas saddasdas?",
       timestamp: "10:32"
   },
   {
@@ -69,7 +69,7 @@ function App() {
   return (
     <>
       <LeftSidebar />
-      <FriendChat messages={messages}/>
+      <Chat messages={messages}/>
       <RightSidebar />
     </>
   )
