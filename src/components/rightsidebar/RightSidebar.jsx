@@ -5,12 +5,12 @@ import useClickOutside from '../../hooks/useClickOutside'; // this is custom hoo
 // Initial state for the sidebar
 const initialState = {
   activeUsers: [
-    { id: 1, name: 'User 1', status: 'online', activity: 'Playing Minecraft' },
-    { id: 2, name: 'User 2', status: 'idle', activity: 'Listening to Spotify' },
-    { id: 3, name: 'User 3', status: 'dnd', activity: 'Streaming' }
+    { id: 1, name: 'User 1', status: 'online', activity: 'Playing Minecraft', friend: true },
+    { id: 2, name: 'User 2', status: 'idle', activity: 'Listening to Spotify', friend: true },
+    { id: 3, name: 'User 3', status: 'dnd', activity: 'Streaming', friend: true }
   ],
   offlineUsers: [
-    { id: 4, name: 'User 4', status: 'offline', activity: '' }
+    { id: 4, name: 'User 4', status: 'offline', activity: '', friend: true }
   ],
   userProfile: {
     id: 0,

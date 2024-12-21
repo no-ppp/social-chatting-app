@@ -69,7 +69,7 @@ function App() {
   return (
     <>
       <LeftSidebar />
-      <Chat messages={messages}/>
+      <FriendChat messages={messages}/>
       <RightSidebar />
     </>
   )

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import useClickOutside from '../../hooks/useClickOutside';
 
 const emojis = [
     '😀', '😂', '😍', '😎', '😢', '😡', '👍', '👎', '🎉', '❤️',
@@ -8,6 +9,11 @@ const emojis = [
 
 const EmojiPicker = ({ onSelect }) => {
     const [isOpen, setIsOpen] = useState(false);
+
+    const emojiPickerRef = useRef(null);
+    useClickOutside(emojiPickerRef, isOpen, () => {
+        setIsOpen(false);
+    });
 
     const togglePicker = () => {
         setIsOpen(!isOpen);
@@ -26,7 +32,7 @@ const EmojiPicker = ({ onSelect }) => {
             </svg>
             </button>
             {isOpen && (
-                <div className="absolute w-64 bottom-full right-0 z-50 bg-discord-dark border border-gray-700 rounded-lg shadow-xl mb-2 p-3 grid grid-cols-5 gap-2">
+                <div ref={emojiPickerRef} className="absolute w-64 bottom-full right-0 z-50 bg-discord-dark border border-gray-700 rounded-lg shadow-xl mb-2 p-3 grid grid-cols-5 gap-2">
                     {emojis.map((emoji) => (
                         <button
                             key={emoji}

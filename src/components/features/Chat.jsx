@@ -1,7 +1,8 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useRef} from 'react';
 import EmojiPicker from './EmojiComponent'
 import GifPicker from 'gif-picker-react'
-import UserMenu from '../rightsidebar/UserMenu'
+import UserMenu from '../rightsidebar/UserMobileMenu'
+import useClickOutside from '../../hooks/useClickOutside';
 
 // Define action types
 const ACTIONS = {
@@ -57,8 +58,8 @@ const chatReducer = (state, action) => {
                 ...state,
                 isGifPickerOpen: false
             }
-        case ACTIONS.OPEN_USER_MENU:
-            return {
+        case ACTIONS.OPEN_USER_MENU:    
+        return {
                 ...state,
                 userMenuPosition: action.payload.position,
                 selectedUser: action.payload.user
@@ -74,9 +75,22 @@ const chatReducer = (state, action) => {
     }
 }
 
-const Chat = ({ messages = [], isFriendChat = false }) => {
+const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
     // Initialize reducer with initial state
     const [state, dispatch] = useReducer(chatReducer, initialState)
+    
+    // Refs for click outside detection
+    const userMenuRef = useRef(null);
+    const gifPickerRef = useRef(null);
+
+    // Use custom hook for handling clicks outside
+    useClickOutside(userMenuRef, !!state.userMenuPosition, () => {
+        dispatch({ type: ACTIONS.CLOSE_USER_MENU });
+    });
+
+    useClickOutside(gifPickerRef, state.isGifPickerOpen, () => {
+        dispatch({ type: ACTIONS.TOGGLE_GIF_PICKER });
+    });
 
     // Handler functions that dispatch actions
     const handleEmojiSelect = (emoji) => {
@@ -95,26 +109,15 @@ const Chat = ({ messages = [], isFriendChat = false }) => {
     const handleAvatarClick = (e, user) => {
         e.stopPropagation();
         const rect = e.currentTarget.getBoundingClientRect();
+        if (isUserMenu) {
         dispatch({ 
             type: ACTIONS.OPEN_USER_MENU, 
             payload: {
-                position: { x: rect.left, y: rect.bottom + 5 },
+                position: { x: 0, y: rect.bottom },
                 user
             }
-        });
+        })};
     }
-
-    // Close menu when clicking outside
-    const handleClickOutside = (e) => {
-        if (state.userMenuPosition && !e.target.closest('.user-menu')) {
-            dispatch({ type: ACTIONS.CLOSE_USER_MENU });
-        }
-    }
-
-    useEffect(() => {
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
 
     return (
         //Think about this, this mt-80 isnt best approach but it works for now 
@@ -124,7 +127,7 @@ const Chat = ({ messages = [], isFriendChat = false }) => {
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-auto p-4 space-y-4 scrollbar scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500 transition-colors duration-200">
                 {messages.map((message) => (
-                    <div key={message.id} className="flex items-start space-x-4 hover:bg-gray-700/30 p-2 rounded-lg min-w-max md:min-w-0">
+                    <div key={message.id} className="flex items-start space-x-4 hover:bg-gray-700/30 p-2 rounded-lg">
                         <div 
                             onClick={(e) => handleAvatarClick(e, message.user)}
                             className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm md:text-lg cursor-pointer hover:opacity-80"
@@ -136,7 +139,7 @@ const Chat = ({ messages = [], isFriendChat = false }) => {
                                 <span className="text-white font-semibold text-base md:text-lg">{message.user}</span>
                                 <span className="text-gray-400 text-xs md:text-sm">{message.timestamp}</span>
                             </div>
-                            <p className="text-gray-300 mt-1 text-sm md:text-base break-words max-w-[400px] ">{message.content}</p>
+                            <p className="text-left text-gray-300 mt-1 text-sm md:text-base break-words sm:max-w-[600px] max-w-[330px] ">{message.content}</p>
                             <button 
                                 onClick={() => handleLike(message.id)}
                                 className={`mt-2 text-sm flex items-center space-x-1 ${state.likedMessages.has(message.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
@@ -150,10 +153,12 @@ const Chat = ({ messages = [], isFriendChat = false }) => {
                     </div>
                 ))}
                 {state.userMenuPosition && state.selectedUser && (
-                    <UserMenu 
-                        user={{ name: state.selectedUser, status: 'online' }}
-                        position={state.userMenuPosition}
-                    />
+                    <div ref={userMenuRef}>
+                        <UserMenu 
+                            user={{ name: state.selectedUser, status: 'online' }}
+                            position={state.userMenuPosition}
+                        />
+                    </div>
                 )}
             </div>
             
@@ -170,10 +175,10 @@ const Chat = ({ messages = [], isFriendChat = false }) => {
                             </svg>
                         </button>
                         {state.isGifPickerOpen && (
-                            <div className="absolute bottom-full left-0 mb-2 z-50">
+                            <div ref={gifPickerRef} className="absolute bottom-full left-0 mb-2 z-50">
                                 <div className="bg-discord-dark border border-gray-700 rounded-lg shadow-xl">
                                     <GifPicker 
-                                        tenorApiKey={"AIzaSyB0e_ZapD9mz5aJinQJj4vmv18U_B65j58"}
+                                        tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
                                         onGifClick={handleGifSelect}
                                         theme="dark"
                                         width={350}

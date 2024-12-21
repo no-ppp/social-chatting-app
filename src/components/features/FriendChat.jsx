@@ -87,14 +87,14 @@ const FriendChat = ({ friend, messages = testMessages }) => {
             setCallDuration(0);
         }
     };
-
+    {/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
     return (
-        <div>
-            <div className="items-center p-4 border-b border-gray-700 lg:ml-[300px] md:mr-[290px] ml-[50px] bg-discord-dark">
+        <div className="-mt-5 md:bg-gray-900 md:p-2">
+            <div className={`items-center p-4 border-4 rounded-lg ${isCallActive ? 'border-green-500' : 'border-discord-blue'} border-gray-700 lg:ml-[300px] md:mr-[290px] ml-[50px] bg-discord-dark`}>
                 <div className="flex flex-col items-center gap-4">
                     <div className="flex items-center relative">
-                        <img src="" alt="User 1" className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-discord-blue hover:border-discord-blue-hover transition-colors"/>
-                        <img src="" alt="User 2" className="w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-discord-blue hover:border-discord-blue-hover transition-colors -ml-4"/>
+                        <img src="" alt="User 1" className={`w-40 h-40 rounded-full border-4 ${isCallActive ? 'border-green-500' : 'border-discord-blue hover:border-discord-blue-hover'} transition-colors`}/>
+                        <img src="" alt="User 2" className={`w-40 h-40 rounded-full border-4 ${isCallActive ? 'border-green-500' : 'border-discord-blue hover:border-discord-blue-hover'} transition-colors -ml-4`}/>
                     </div>
                     <div className="flex items-center gap-4">
                         <p className="text-white text-xl font-semibold">Czat z użytkownikiem</p>
@@ -121,7 +121,7 @@ const FriendChat = ({ friend, messages = testMessages }) => {
                     )}
                 </div>
             </div>
-            <Chat messages={messages} isUserChat={true} isFriendChat={true} />
+            <Chat messages={messages} isUserChat={true} isFriendChat={true} isUserMenu={false} />
         </div>
     )
 }

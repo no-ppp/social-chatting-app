@@ -3,11 +3,12 @@ const MobileUserMenu = ({ user, position, onClose }) => (
     <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors" onClick={onClose}>
       Zobacz profil
     </button>
-    {user.status !== 'offline' && (
-      <>
+    
         <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors" onClick={onClose}>
           Wyślij wiadomość
         </button>
+        {user.status !== 'offline' && user.friend && (
+      <>
         <button className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-700/50 hover:text-white transition-colors" onClick={onClose}>
           Zadzwoń
         </button>
