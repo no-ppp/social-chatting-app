@@ -26,15 +26,10 @@ const LeftSidebar = () => {
     }
   };
 
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [state.isChannelsVisible]);
 
   return (
     <div className="fixed left-0 top-0 flex h-screen z-50 left-sidebar">
+      
       <div 
         className={`
           fixed inset-0 bg-black/50 transition-opacity duration-300 lg:hidden
@@ -44,8 +39,13 @@ const LeftSidebar = () => {
       />
 
       <div className="relative z-50 bg-discord-dark w-16 flex flex-col">
-        <ServerSidebar />
+        <ServerSidebar 
+          serverList={state.isChannelsVisible ? '🔼' : '🔽'} 
+          onClick={() => dispatch({ type: 'TOGGLE_CHANNELS' })}
+        />
+        
       </div>
+      
 
       <div 
         className={`
@@ -65,13 +65,9 @@ const LeftSidebar = () => {
       >
         <ChannelSidebar />
       </div>
+      
 
-      <button 
-        className="fixed bottom-4 left-20 bg-discord-dark rounded-full p-2 text-white lg:hidden"
-        onClick={() => dispatch({ type: 'TOGGLE_CHANNELS' })}
-      >
-        {state.isChannelsVisible ? '🔼' : '🔽'}
-      </button>
+      
     </div>
   );
 };

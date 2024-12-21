@@ -1,4 +1,4 @@
-import UserItem from './UserItem';
+import UserItem from '../UserItem';
 
 const UserList = ({ users, onUserClick, selectedUser, getStatusColor }) => (
   <div className="space-y-2">
