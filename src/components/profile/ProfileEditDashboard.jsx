@@ -95,7 +95,7 @@ const ProfileEditDashboard = () => {
             <img 
                 src="" 
                 alt="" 
-                className="border-4 border-discord-blue rounded-full 2xl:h-72 2xl:w-72 h-44 w-44 object-cover transition-transform duration-300 group-hover:scale-105"
+                className="border-4 border-discord-blue rounded-full 2xl:h-72 2xl:w-72 h-40 w-40 object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="text-white text-sm">Change Avatar</button>
@@ -186,22 +186,22 @@ const ProfileEditDashboard = () => {
     );
 
     return (
-        <div className="lg:ml-[280px] md:mr-[270px] ml-[40px] p-8 flex flex-col min-h-screen items-center bg-discord-darker">
+        <div className="lg:ml-[280px] md:mr-[270px] ml-[40px] flex flex-col min-h-screen items-center bg-discord-darker">
             <div className="w-full max-w-4xl bg-discord-dark rounded-lg shadow-xl p-8">
-                <div className="flex flex-col items-center gap-8 mb-8">
+                <div className="flex flex-col items-center gap-4 mb-4">
                     {renderAvatar()}
                     {renderUserInfo()}
                 </div>
 
                 <div className="flex flex-col gap-6">
-                    <div className="space-y-4 bg-discord-darker p-6 rounded-lg shadow-inner">
+                    <div className="space-y-3 bg-discord-darker p-6 rounded-lg shadow-inner">
                         {renderEmailSection()}
                         {renderPasswordSection()}
                         {renderBioSection()}
                     </div>
                 </div>
 
-                <button className="w-full mt-8 bg-discord-gray hover:bg-discord-blue-hover text-white py-3 px-6 rounded-md text-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+                <button className="w-full mt-2 bg-discord-gray hover:bg-discord-blue-hover text-white py-3 px-6 rounded-md text-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
                     Save All Changes
                 </button>
             </div>

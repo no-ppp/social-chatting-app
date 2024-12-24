@@ -1,3 +1,4 @@
+import { useReducer } from 'react'
 import LeftSidebar from './components/leftsidebar/LeftSidebar'
 import RightSidebar from './components/rightsidebar/RightSidebar'
 import ServerContentDashboard from './components/content/ServerContentDashboard'
@@ -65,12 +66,96 @@ const messages = [
 }
 ];
 
+const ACTIONS = {
+  SHOW_FRIEND_CHAT: 'SHOW_FRIEND_CHAT',
+  SHOW_SERVER_CONTENT: 'SHOW_SERVER_CONTENT',
+  SHOW_CHANNEL_CONTENT: 'SHOW_CHANNEL_CONTENT',
+  SHOW_PROFILE_EDIT: 'SHOW_PROFILE_EDIT',
+  SHOW_PROFILE: 'SHOW_PROFILE'
+}
+
+const initialState = {
+  currentView: 'FRIEND_CHAT',
+  messages: messages
+}
+
+const appReducer = (state, action) => {
+  switch (action.type) {
+    case ACTIONS.SHOW_FRIEND_CHAT:
+      return {
+        ...state,
+        currentView: 'FRIEND_CHAT'
+      }
+    case ACTIONS.SHOW_SERVER_CONTENT:
+      return {
+        ...state,
+        currentView: 'SERVER_CONTENT'
+      }
+    case ACTIONS.SHOW_CHANNEL_CONTENT:
+      return {
+        ...state,
+        currentView: 'CHANNEL_CONTENT'
+      }
+    case ACTIONS.SHOW_PROFILE_EDIT:
+      return {
+        ...state,
+        currentView: 'PROFILE_EDIT'
+      }
+    case ACTIONS.SHOW_PROFILE:
+      return {
+        ...state,
+        currentView: 'PROFILE'
+      }
+    default:
+      return state
+  }
+}
+
+{/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
+{/*TODO: workon doubleclicks there are some errors on gif/emoji*/}
+{/*TODO: gifs seems to doesnt appear on some media devices*/}
+{/*TODO: connect everything in frontend*/}
+{/*TODO: add user menu*/}
+{/*TODO: add friend chat*/}
+{/*TODO: add server chat*/}
+{/*TODO: add channel chat*/}
+{/*TODO: add profile edit*/}
+{/*TODO: add profile*/}
+{/*TODO: add server content*/}
+{/*TODO: add channel content*/}
+{/*TODO: add some kind of a search bar to look for friends*/}
+{/*TODO: move to the backend to dont stack there forever*/}
+{/*TODO: implement other things in future*/}
 function App() {
+  const [state, dispatch] = useReducer(appReducer, initialState)
+
+  const renderContent = () => {
+    switch (state.currentView) {
+      case 'FRIEND_CHAT':
+        return <FriendChat messages={state.messages} />
+      case 'SERVER_CONTENT':
+        return <ServerContentDashboard />
+      case 'CHANNEL_CONTENT':
+        return <ChannelContentDashboard />
+      case 'PROFILE_EDIT':
+        return <ProfileEditDashboard />
+      case 'PROFILE':
+        return <ProfileDashboard />
+      default:
+        return <FriendChat messages={state.messages} />
+    }
+  }
+
   return (
     <>
       <LeftSidebar />
-      <FriendChat messages={messages}/>
-      <RightSidebar />
+      {renderContent()}
+      <RightSidebar 
+      settingHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE_EDIT })}
+      seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
+      sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // I leave it in the same dispatch for now
+      callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // when working on backend we will change it to the call handler
+      />
     </>
   )
 }
