@@ -49,6 +49,30 @@ const testMessages = [
         user: "Jane Smith",
         content: "Świetny pomysł! O której proponujesz?",
         timestamp: "10:36"
+    },
+    {
+        id: 9,
+        user: "John Doe",
+        content: "Może o 15:00 w tej kawiarni na rynku?",
+        timestamp: "10:37"
+    },
+    {
+        id: 10,
+        user: "Jane Smith", 
+        content: "Idealnie! Do zobaczenia!",
+        timestamp: "10:38"
+    },
+    {
+        id: 11,
+        user: "John Doe",
+        content: "Super, nie mogę się doczekać!",
+        timestamp: "10:39"
+    },
+    {
+        id: 12,
+        user: "Jane Smith",
+        content: "Ja również! Będzie fajnie pogadać na żywo 😊",
+        timestamp: "10:40"
     }
 ];
 
