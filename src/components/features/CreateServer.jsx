@@ -298,7 +298,7 @@ const CreateServer = () => {
                 </div>
 
                 <button className="w-full mt-2 bg-discord-gray hover:bg-discord-blue-hover text-white py-3 px-6 rounded-md text-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                    Edit Server
+                    Save
                 </button>
             </div>
         </div>
