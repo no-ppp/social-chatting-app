@@ -130,7 +130,7 @@ const MessageItem = ({ message, onLike, onAvatarClick, isLiked }) => (
     </div>
 );
 
-const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
+const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true, seeProfileHandler, sendMessageHandler }) => {
     const [state, dispatch] = useReducer(chatReducer, initialState);
     
     const userMenuRef = useRef(null);
@@ -215,23 +215,26 @@ const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
                         <UserMenu 
                             user={{ name: state.selectedUser, status: 'online' }}
                             position={state.userMenuPosition}
+                            sendMessageHandler={sendMessageHandler}
+                            seeProfileHandler={seeProfileHandler}
+
                         />
                     </div>
                 )}
             </div>
             
-            <div className="p-3 lg:p-6 border-t border-gray-700">
-                <div className="flex items-center space-x-2 md:space-x-3 relative">
+            <div className="p-4 border-t border-gray-700">
+                <div className="flex items-center -space-x-2 relative">
                     <div className="flex-shrink-0">
                         <button 
                             onClick={(e) => {
                                 e.stopPropagation();
                                 dispatch({ type: ACTIONS.TOGGLE_GIF_PICKER });
                             }}
-                            className="p-2 md:p-3 text-gray-400 hover:text-white"
+                            className="p-3 md:p-4 text-gray-400 hover:text-white"
                             aria-label="Add GIF"
                         >
-                            <svg className="w-5 h-5 md:w-7 md:h-7" viewBox="0 0 24 24" fill="currentColor">
+                            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-3h4v-2h-4v2zm0-3h4v-2h-4v2zm0-3h4V9h-4v2z"/>
                             </svg>
                         </button>
@@ -243,7 +246,7 @@ const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
                                         tenorApiKey={import.meta.env.VITE_TENOR_API_KEY}
                                         onGifClick={handleGifSelect}
                                         theme="dark"
-                                        width={350}
+                                        width={400}
                                     />
                                 </div>
                             </div>
@@ -259,10 +262,10 @@ const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
                     />
                     <button 
                         onClick={() => fileInputRef.current.click()}
-                        className="p-2 md:p-3 text-gray-400 hover:text-white flex-shrink-0" 
+                        className="p-3 md:p-4 text-gray-400 hover:text-white flex-shrink-0" 
                         aria-label="Add attachment"
                     >
-                        <svg className="w-5 h-5 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                         </svg>
                     </button>
@@ -272,7 +275,7 @@ const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
                         value={state.messageInput}
                         onChange={(e) => dispatch({ type: ACTIONS.SET_MESSAGE, payload: e.target.value })}
                         placeholder="Napisz wiadomość..."
-                        className="flex-1 bg-gray-700 text-white rounded-lg px-3 lg:px-5 py-2 md:py-3 text-sm md:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 min-w-0 bg-gray-700 text-white rounded-lg px-3 lg:px-5 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         aria-label="Message input"
                     />
                     
@@ -282,10 +285,11 @@ const Chat = ({ messages = [], isFriendChat = false, isUserMenu = true }) => {
                                 e.stopPropagation();
                                 dispatch({ type: ACTIONS.TOGGLE_EMOJI_PICKER });
                             }}
-                            className="p-2 md:p-3 text-gray-400 hover:text-white" 
+                            className="p-3 md:p-4 text-gray-400 hover:text-white" 
                             aria-label="Add emoji"
                         >
-                            <EmojiPicker onSelect={handleEmojiSelect} isOpen={state.isEmojiPickerOpen} />
+                                <EmojiPicker onSelect={handleEmojiSelect} isOpen={state.isEmojiPickerOpen} />
+                            
                         </button>
                     </div>
                 </div>

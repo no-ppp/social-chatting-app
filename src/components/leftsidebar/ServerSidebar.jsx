@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ServerSidebar = ({serverList, onClick}) => {
+const ServerSidebar = ({serverList, serverHandler, onClick}) => {
   // Przykładowe dane serwerów
   const servers = [
     { id: 1, name: 'Serwer 1', description: 'Pierwszy serwer' },
@@ -15,6 +15,7 @@ const ServerSidebar = ({serverList, onClick}) => {
         <div 
           key={server.id}
           className="p-2 hover:bg-gray-700 cursor-pointer relative group"
+          onClick={() => serverHandler(server.id)} // Added onClick handler to main div
         >
           {server.name}
           {/* Tooltip z informacjami o serwerze */}

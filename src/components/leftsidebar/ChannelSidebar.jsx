@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ChannelSidebar = () => {
+const ChannelSidebar = ({channelHandler}) => {
   // Przykładowe dane kanałów
   const channels = [
     { id: 1, name: 'Kanał 1', description: 'This is the first channel' },
@@ -15,6 +15,7 @@ const ChannelSidebar = () => {
       {channels.map(channel => (
         <div 
           key={channel.id}
+          onClick={() => channelHandler(channel.id)}
           className="relative p-3 hover:bg-gray-600 cursor-pointer transition-colors duration-200 rounded-md flex items-center group"
         >
           <span className="text-gray-300">{channel.name}</span>

@@ -2,11 +2,11 @@ import { useReducer } from 'react'
 import LeftSidebar from './components/leftsidebar/LeftSidebar'
 import RightSidebar from './components/rightsidebar/RightSidebar'
 import ServerContentDashboard from './components/content/ServerContentDashboard'
-import ChannelContentDashboard from './components/content/ChannelContentDashboard'
 import Chat from './components/features/Chat'
 import ProfileEditDashboard from './components/profile/ProfileEditDashboard'
 import ProfileDashboard from './components/profile/ProfileDashboard'
 import FriendChat from './components/features/FriendChat'
+import ChannelChat from './components/features/ChannelChat'
 import './App.css'
 
 const messages = [
@@ -112,8 +112,7 @@ const appReducer = (state, action) => {
 }
 
 {/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
-{/*TODO: workon doubleclicks there are some errors on gif/emoji*/}
-{/*TODO: gifs seems to doesnt appear on some media devices*/}
+{/*TODO: workon doubleclicks there are some errors on gif*/}
 {/*TODO: connect everything in frontend*/}
 {/*TODO: add user menu*/}
 {/*TODO: add friend chat*/}
@@ -136,7 +135,10 @@ function App() {
       case 'SERVER_CONTENT':
         return <ServerContentDashboard />
       case 'CHANNEL_CONTENT':
-        return <ChannelContentDashboard />
+        return <ChannelChat 
+          seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
+          sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
+        />
       case 'PROFILE_EDIT':
         return <ProfileEditDashboard />
       case 'PROFILE':
@@ -146,15 +148,24 @@ function App() {
     }
   }
 
+  const handleServerClick = (serverId) => {
+    console.log('Server clicked:', serverId); // Debug log
+    dispatch({type: ACTIONS.SHOW_SERVER_CONTENT});
+  }
+
   return (
     <>
-      <LeftSidebar />
+      <LeftSidebar 
+        serverHandler={handleServerClick}
+        serverList={state.serverList}
+        channelHandler={() => dispatch( { type: ACTIONS.SHOW_CHANNEL_CONTENT })}
+      />
       {renderContent()}
       <RightSidebar 
-      settingHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE_EDIT })}
-      seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
-      sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // I leave it in the same dispatch for now
-      callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // when working on backend we will change it to the call handler
+        settingHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE_EDIT })}
+        seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
+        sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // I leave it in the same dispatch for now
+        callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // when working on backend we will change it to the call handler
       />
     </>
   )

@@ -17,7 +17,7 @@ const reducer = (state, action) => {
   }
 };
 
-const LeftSidebar = () => {
+const LeftSidebar = ({channelHandler, serverHandler}) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleClickOutside = (event) => {
@@ -40,6 +40,7 @@ const LeftSidebar = () => {
 
       <div className="relative z-50 bg-discord-dark w-16 flex flex-col">
         <ServerSidebar 
+        serverHandler={serverHandler}
           serverList={state.isChannelsVisible ? '🔼' : '🔽'} 
           onClick={() => dispatch({ type: 'TOGGLE_CHANNELS' })}
         />
@@ -54,7 +55,9 @@ const LeftSidebar = () => {
           hidden lg:block
         `}
       >
-        <ChannelSidebar />
+        <ChannelSidebar 
+        channelHandler={channelHandler}
+        />
       </div>
 
       <div 
@@ -63,7 +66,8 @@ const LeftSidebar = () => {
           ${state.isChannelsVisible ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <ChannelSidebar />
+        <ChannelSidebar 
+        channelHandler={channelHandler}/>
       </div>
       
 
