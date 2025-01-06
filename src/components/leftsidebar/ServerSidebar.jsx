@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import SearchBar from '../features/SearchBar';
 const ServerSidebar = ({channelList, serverHandler, onClick}) => {
   // Track which server is currently selected
   const [selectedServer, setSelectedServer] = useState(null);
@@ -18,6 +18,7 @@ const ServerSidebar = ({channelList, serverHandler, onClick}) => {
   };
 
   return (
+    
     <div className="bg-discord-dark w-16 flex flex-col items-center py-3 h-full">
       {/* Server list */}
       <div className="flex flex-col items-center space-y-5">
@@ -45,11 +46,16 @@ const ServerSidebar = ({channelList, serverHandler, onClick}) => {
         ))}
       </div>
 
-      {/* Mobile channel toggle button */}
-      <div className="mt-auto mb-3 lg:hidden">
+      <div className="mt-auto mb-3">
+        <div className="w-12 h-12 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl">
+          <SearchBar />
+          <div className="absolute left-0 w-1 h-0 group-hover:h-[20px] bg-white rounded-r-full transition-all duration-200" />
+        </div>
+
+        {/* Mobile channel toggle button - only visible on small screens */}
         <div 
           onClick={onClick}
-          className="w-12 h-12 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl"
+          className="w-12 h-12 mt-3 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl md:hidden"
         >
           {channelList}
           <div className="absolute left-0 w-1 h-0 group-hover:h-[20px] bg-white rounded-r-full transition-all duration-200" />

@@ -7,6 +7,7 @@ import ProfileEditDashboard from './components/profile/ProfileEditDashboard'
 import ProfileDashboard from './components/profile/ProfileDashboard'
 import FriendChat from './components/features/FriendChat'
 import ChannelChat from './components/features/ChannelChat'
+import SearchBar from './components/features/SearchBar'
 import './App.css'
 
 const messages = [
@@ -153,6 +154,7 @@ function App() {
         serverList={state.serverList}
         channelHandler={() => dispatch( { type: ACTIONS.SHOW_CHANNEL_CONTENT })}
       />
+      
       {renderContent()}
       <RightSidebar 
         settingHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE_EDIT })}

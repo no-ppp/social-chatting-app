@@ -32,6 +32,8 @@ const reducer = (state, action) => {
       return { ...state, selectedUser: state.selectedUser?.id === action.payload.id ? null : action.payload };
     case 'CLOSE_MENU':
       return { ...state, isMenuOpen: false, selectedUser: null };
+    case 'CLOSE_USER_MENU':
+      return { ...state, selectedUser: null };
     case 'TOGGLE_STATUS_MENU':
       return { 
         ...state, 
@@ -62,9 +64,11 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const menuRef = useRef(null);
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   useClickOutside(menuRef, state.isMenuOpen, () => dispatch({ type: 'CLOSE_MENU' }));
-  
+  useClickOutside(userMenuRef, state.selectedUser !== null, () => dispatch({ type: 'CLOSE_USER_MENU' }));
+  useClickOutside(statusMenuRef, state.userProfile.showStatusMenu, () => dispatch({ type: 'TOGGLE_STATUS_MENU' }));
 
   // Helper function to get status indicator color
   const getStatusColor = (status) => {
@@ -89,6 +93,8 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       <button 
         onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'online' })}
         className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
+        type="button"
+        data-close-button
       >
         <div className={`w-3 h-3 rounded-full ${getStatusColor('online')} mr-2`}></div>
         <span className="text-white">Online</span>
@@ -96,6 +102,8 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       <button 
         onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'idle' })}
         className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
+        type="button"
+        data-close-button
       >
         <div className={`w-3 h-3 rounded-full ${getStatusColor('idle')} mr-2`}></div>
         <span className="text-white">Idle</span>
@@ -103,6 +111,8 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       <button 
         onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'dnd' })}
         className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
+        type="button"
+        data-close-button
       >
         <div className={`w-3 h-3 rounded-full ${getStatusColor('dnd')} mr-2`}></div>
         <span className="text-white">Do Not Disturb</span>
@@ -110,12 +120,18 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       <button 
         onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'offline' })}
         className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
+        type="button"
+        data-close-button
       >
         <div className={`w-3 h-3 rounded-full ${getStatusColor('offline')} mr-2`}></div>
         <span className="text-white">Offline</span>
       </button>
       <div className="border-t border-gray-700 my-2"></div>
-      <button className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg">
+      <button 
+        className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
+        type="button"
+        data-close-button
+      >
         <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
         </svg>
@@ -143,13 +159,15 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
         {user.activity && <div className="text-xs text-gray-400 mt-0.5 italic">{user.activity}</div>}
       </div>
       {state.selectedUser?.id === user.id && (
-        <UserMobileMenu
-          user={user} 
-          position={{ x: 0, y: '100%' }}
-          seeProfileHandler={seeProfileHandler}
-          callHandler={callHandler}
-          sendMessageHandler={sendMessageHandler}
-        />
+        <div ref={userMenuRef}>
+          <UserMobileMenu
+            user={user} 
+            position={{ x: 0, y: '100%' }}
+            seeProfileHandler={seeProfileHandler}
+            callHandler={callHandler}
+            sendMessageHandler={sendMessageHandler}
+          />
+        </div>
       )}
     </div>
   );
@@ -163,6 +181,8 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
           e.stopPropagation();
           dispatch({ type: 'TOGGLE_STATUS_MENU' });
         }}
+        type="button"
+        data-close-button
       >
         <div className="relative">
           <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
