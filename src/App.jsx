@@ -113,7 +113,6 @@ const appReducer = (state, action) => {
 
 {/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
 {/*TODO: workon doubleclicks there are some errors on gif*/}
-{/*TODO: connect everything in frontend*/}
 {/*TODO: add user menu*/}
 {/*TODO: add friend chat*/}
 {/*TODO: add server chat*/}
@@ -142,7 +141,9 @@ function App() {
       case 'PROFILE_EDIT':
         return <ProfileEditDashboard />
       case 'PROFILE':
-        return <ProfileDashboard />
+        return <ProfileDashboard 
+          sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // will have to work on it with backend so user cant send message if not in friends
+          />
       default:
         return <FriendChat messages={state.messages} />
     }

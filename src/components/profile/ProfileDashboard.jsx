@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const ProfileDashboard = () => {
+const ProfileDashboard = ({ sendMessageHandler }) => {
     const [addFriend, setAddFriend] = useState(false)
 
     const addFriendHandler = () => {
@@ -47,7 +47,7 @@ const ProfileDashboard = () => {
                         <div className="flex flex-col">
                             <div className="flex justify-between items-center border-b border-gray-700 pb-2">
                                 <p className="text-white text-lg font-sm">Send message</p>
-                                <button className="text-discord-blue hover:text-discord-blue-hover transition-colors">
+                                <button onClick={sendMessageHandler} className="text-discord-blue hover:text-discord-blue-hover transition-colors">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
                                     </svg>
