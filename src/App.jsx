@@ -2,12 +2,11 @@ import { useReducer } from 'react'
 import LeftSidebar from './components/leftsidebar/LeftSidebar'
 import RightSidebar from './components/rightsidebar/RightSidebar'
 import ServerContentDashboard from './components/content/ServerContentDashboard'
-import Chat from './components/features/Chat'
 import ProfileEditDashboard from './components/profile/ProfileEditDashboard'
 import ProfileDashboard from './components/profile/ProfileDashboard'
 import FriendChat from './components/features/FriendChat'
 import ChannelChat from './components/features/ChannelChat'
-import SearchBar from './components/features/SearchBar'
+import CreateServer from './components/features/CreateServer'
 import './App.css'
 
 const messages = [
@@ -72,12 +71,14 @@ const ACTIONS = {
   SHOW_SERVER_CONTENT: 'SHOW_SERVER_CONTENT',
   SHOW_CHANNEL_CONTENT: 'SHOW_CHANNEL_CONTENT',
   SHOW_PROFILE_EDIT: 'SHOW_PROFILE_EDIT',
-  SHOW_PROFILE: 'SHOW_PROFILE'
+  SHOW_PROFILE: 'SHOW_PROFILE',
+  SHOW_CREATE_SERVER: 'SHOW_CREATE_SERVER'
 }
 
 const initialState = {
   currentView: 'FRIEND_CHAT',
-  messages: messages
+  messages: messages,
+  serverList: [] // Added missing serverList to initial state
 }
 
 const appReducer = (state, action) => {
@@ -107,16 +108,16 @@ const appReducer = (state, action) => {
         ...state,
         currentView: 'PROFILE'
       }
+    case ACTIONS.SHOW_CREATE_SERVER:
+      return {
+        ...state,
+        currentView: 'CREATE_SERVER'
+      }
     default:
       return state
   }
 }
 
-{/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
-{/*TODO: workon doubleclicks there are some errors on gif*/}
-{/*TODO: add some kind of a search bar to look for friends*/}
-{/*TODO: move to the backend to dont stack there forever*/}
-{/*TODO: implement other things in future*/}
 function App() {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
@@ -135,32 +136,38 @@ function App() {
         return <ProfileEditDashboard />
       case 'PROFILE':
         return <ProfileDashboard 
-          sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // will have to work on it with backend so user cant send message if not in friends
-          />
+          sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
+        />
+      case 'CREATE_SERVER':
+        return <CreateServer 
+        />
       default:
-        return <FriendChat messages={state.messages} />
+        return <FriendChat messages={state.messages} /> // Changed default to FriendChat
     }
   }
 
   const handleServerClick = (serverId) => {
-    console.log('Server clicked:', serverId); // Debug log
+    console.log('Server clicked:', serverId);
     dispatch({type: ACTIONS.SHOW_SERVER_CONTENT});
   }
 
   return (
     <>
-      <LeftSidebar 
+      <LeftSidebar
+        editServerHandler={() => dispatch({ type: ACTIONS.SHOW_CREATE_SERVER })}
         serverHandler={handleServerClick}
         serverList={state.serverList}
-        channelHandler={() => dispatch( { type: ACTIONS.SHOW_CHANNEL_CONTENT })}
+        channelHandler={() => dispatch({ type: ACTIONS.SHOW_CHANNEL_CONTENT })}
+        joinServerHandler={() => dispatch({ type: ACTIONS.SHOW_SERVER_CONTENT})}
       />
       
       {renderContent()}
+
       <RightSidebar 
         settingHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE_EDIT })}
         seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
-        sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // I leave it in the same dispatch for now
-        callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })} // when working on backend we will change it to the call handler
+        sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
+        callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
       />
     </>
   )

@@ -1,4 +1,4 @@
-import { useReducer, useRef } from 'react';
+import { useReducer, useRef, useEffect } from 'react';
 import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 
@@ -69,6 +69,18 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   useClickOutside(menuRef, state.isMenuOpen, () => dispatch({ type: 'CLOSE_MENU' }));
   useClickOutside(userMenuRef, state.selectedUser !== null, () => dispatch({ type: 'CLOSE_USER_MENU' }));
   useClickOutside(statusMenuRef, state.userProfile.showStatusMenu, () => dispatch({ type: 'TOGGLE_STATUS_MENU' }));
+
+  // Close mobile menu when screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && state.isMenuOpen) { // 768px is md breakpoint
+        dispatch({ type: 'CLOSE_MENU' });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [state.isMenuOpen]);
 
   // Helper function to get status indicator color
   const getStatusColor = (status) => {
@@ -222,13 +234,15 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       </button>
 
       {/* Mobile overlay */}
-      <div className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 lg:hidden ${state.isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${state.isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div ref={menuRef} className={`fixed right-0 top-0 w-72 h-screen bg-discord-sidebar transform transition-transform duration-300 ${state.isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="p-4">
+            <div className="bg-discord-dark rounded-lg p-3 shadow-md border border-gray-800 hover:border-gray-700 hover:bg-discord-dark/90 transition-all duration-200 mb-4">
+              {renderUserProfile()}
+            </div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-gray-400 uppercase text-xs font-bold tracking-wider">Active Friends — {state.activeUsers.length}</h2>
             </div>
-            {renderUserProfile()}
             <div className="space-y-2">{state.activeUsers.map(renderUser)}</div>
             <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {state.offlineUsers.length}</h2>
             <div className="space-y-2">{state.offlineUsers.map(renderUser)}</div>
@@ -239,10 +253,10 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       {/* Desktop sidebar */}
       <div className="fixed right-0 top-0 w-0 h-screen bg-discord-sidebar border-l border-gray-800 transition-all duration-300 md:w-72">
         <div className="p-4">
-          <div className="bg-discord-dark rounded-lg p-3 shadow-md border border-gray-800 hover:border-gray-700 hover:bg-discord-dark/90 transition-all duration-200 mx-auto max-w-[95%]">
-          {renderUserProfile()}
+          <div className="bg-discord-dark rounded-lg p-3 shadow-md border border-gray-800 hover:border-gray-700 hover:bg-discord-dark/90 transition-all duration-200 mb-4">
+            {renderUserProfile()}
           </div>
-          <h2 className="text-gray-400 uppercase text-xs font-bold mb-4 mt-4 tracking-wider">Active Friends — {state.activeUsers.length}</h2>
+          <h2 className="text-gray-400 uppercase text-xs font-bold mb-4 tracking-wider">Active Friends — {state.activeUsers.length}</h2>
           <div className="space-y-2">{state.activeUsers.map(renderUser)}</div>
           <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {state.offlineUsers.length}</h2>
           <div className="space-y-2">{state.offlineUsers.map(renderUser)}</div>

@@ -17,7 +17,7 @@ const reducer = (state, action) => {
   }
 };
 
-const LeftSidebar = ({channelHandler, serverHandler}) => {
+const LeftSidebar = ({channelHandler, serverHandler, editServerHandler, joinServerHandler}) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const handleClickOutside = (event) => {
@@ -41,6 +41,8 @@ const LeftSidebar = ({channelHandler, serverHandler}) => {
       <div className="relative z-50 bg-discord-dark w-16 flex flex-col items-center shadow-lg">
         <ServerSidebar 
           serverHandler={serverHandler}
+          editServerHandler={editServerHandler}
+          joinServerHandler={joinServerHandler}
           channelList={
             <button 
               className="w-12 h-12 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl"
