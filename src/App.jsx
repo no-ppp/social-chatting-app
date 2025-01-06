@@ -113,14 +113,6 @@ const appReducer = (state, action) => {
 
 {/*TODO: add user avatar make a pulse border add sound to the call refactor it to reducer*/}
 {/*TODO: workon doubleclicks there are some errors on gif*/}
-{/*TODO: add user menu*/}
-{/*TODO: add friend chat*/}
-{/*TODO: add server chat*/}
-{/*TODO: add channel chat*/}
-{/*TODO: add profile edit*/}
-{/*TODO: add profile*/}
-{/*TODO: add server content*/}
-{/*TODO: add channel content*/}
 {/*TODO: add some kind of a search bar to look for friends*/}
 {/*TODO: move to the backend to dont stack there forever*/}
 {/*TODO: implement other things in future*/}

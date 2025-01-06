@@ -64,8 +64,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const selectedUserRef = useRef(null);
 
   useClickOutside(menuRef, state.isMenuOpen, () => dispatch({ type: 'CLOSE_MENU' }));
-  useClickOutside(statusMenuRef, state.userProfile.showStatusMenu, () => dispatch({ type: 'SET_USER_STATUS', payload: state.userProfile.status }));
-  useClickOutside(selectedUserRef, !!state.selectedUser, () => dispatch({ type: 'SET_SELECTED_USER', payload: state.selectedUser }));
+  
 
   // Helper function to get status indicator color
   const getStatusColor = (status) => {
@@ -150,7 +149,6 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
           seeProfileHandler={seeProfileHandler}
           callHandler={callHandler}
           sendMessageHandler={sendMessageHandler}
-           
         />
       )}
     </div>
@@ -187,14 +185,19 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
     <>
       {/* Mobile menu toggle button */}
       <button 
-        onClick={(e) => {
-          e.stopPropagation();
+        onClick={() => { 
           dispatch({ type: 'TOGGLE_MENU' });
-        }} 
+        }}
+        type="button"
+        data-close-button  // <- it is from useClickOutside hook to prevent outside click
         className="fixed right-4 top-4 md:hidden z-50 bg-discord-dark p-2 rounded-lg"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          {state.isMenuOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          )}
         </svg>
       </button>
 
@@ -204,11 +207,6 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-gray-400 uppercase text-xs font-bold tracking-wider">Active Friends — {state.activeUsers.length}</h2>
-              <button onClick={() => dispatch({ type: 'CLOSE_MENU' })} className="text-gray-400 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
             {renderUserProfile()}
             <div className="space-y-2">{state.activeUsers.map(renderUser)}</div>

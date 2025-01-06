@@ -11,7 +11,17 @@ export default {
         'discord-gray': '#36393f',
         'discord-dark': '#202225',
         'discord-sidebar': '#2f3136',
-      }
+      },
+      animation: {
+        'pulse-border': 'pulse 1.5s infinite',
+      },
+      keyframes: {
+        pulse: {
+          '0%': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+          '50%': { borderColor: 'rgba(255, 255, 255, 1)' },
+          '100%': { borderColor: 'rgba(255, 255, 255, 0.5)' },
+        },
+      },
     },
   },
   plugins: [
