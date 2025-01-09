@@ -1,92 +1,121 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://127.0.0.1:8000/api';
 
 export const authAPI = {
-  async login(email, password) {
+  async register(email, password, username) {
     try {
-      const response = await fetch(`${API_URL}/login/`, {
+      // Przygotuj dane zgodnie z dokumentacją API
+      const registerPayload = {
+        email: email,
+        username: username,
+        password: password,
+        password2: password  // Wymagane przez API
+      };
+
+      console.log('Register payload:', registerPayload);
+
+      const registerResponse = await fetch(`${API_URL}/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(registerPayload),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Login failed');
+      // Logowanie surowej odpowiedzi dla debugowania
+      const responseText = await registerResponse.text();
+      console.log('Raw register response:', responseText);
+
+      let registerData;
+      try {
+        registerData = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Error parsing register response:', e);
+        throw new Error('Invalid server response');
       }
 
-      const data = await response.json();
-      console.log('Login response:', data);
+      console.log('Parsed register response:', registerData);
 
-      // Sprawdź nową strukturę odpowiedzi
-      if (!data.tokens || !data.tokens.access || !data.tokens.refresh) {
-        throw new Error('Invalid token data received');
+      if (!registerResponse.ok) {
+        if (registerData.username || registerData.email || registerData.password) {
+          const errors = [];
+          if (registerData.username) errors.push(`Username: ${registerData.username[0]}`);
+          if (registerData.email) errors.push(`Email: ${registerData.email[0]}`);
+          if (registerData.password) errors.push(`Password: ${registerData.password[0]}`);
+          throw new Error(errors.join('\n'));
+        }
+        throw new Error(registerData.message || 'Registration failed');
       }
-      
-      // Zapisz tokeny z nowej struktury
-      localStorage.setItem('access_token', data.tokens.access);
-      localStorage.setItem('refresh_token', data.tokens.refresh);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.removeItem('token');
 
-      return data;
+      // Czekamy chwilę przed próbą logowania
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      console.log('Attempting login after registration with:', {
+        email: email,
+        password: password
+      });
+
+      const loginData = await this.login(email, password);
+      console.log('Login after registration successful:', loginData);
+
+      return loginData;
     } catch (error) {
-      console.error('Login error:', error);
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Unable to connect to the server');
-      }
+      console.error('Register/Login error:', error);
       throw error;
     }
   },
 
-  async register(email, password, username) {
+  async login(email, password) {
     try {
-      console.log('Register payload:', { email, password, username }); // Debugging
+      const loginPayload = {
+        email: email,
+        password: password
+      };
 
-      const response = await fetch(`${API_URL}/register/`, {
+      console.log('Login payload:', { ...loginPayload, password: '***' });
+
+      const response = await fetch(`${API_URL}/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          username: username,
-          password2: password,
-        }),
+        body: JSON.stringify(loginPayload),
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        console.error('Received non-JSON response:', await response.text());
-        throw new Error('Server returned non-JSON response');
+      // Logowanie surowej odpowiedzi dla debugowania
+      const responseText = await response.text();
+      console.log('Raw login response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Error parsing login response:', e);
+        throw new Error('Invalid server response');
       }
 
       if (!response.ok) {
-        const error = await response.json();
-        console.log('Register error response:', error);
-        
-        if (typeof error === 'object') {
-          const errorMessage = Object.entries(error)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-          throw new Error(errorMessage);
-        }
-        throw new Error(error.message || 'Registration failed');
+        throw new Error(data.detail || data.message || 'Login failed');
       }
 
-      const data = await response.json();
-      console.log('Register success:', data);
+      console.log('Login response:', data);
 
-      // Po udanej rejestracji, zaloguj użytkownika
-      return await this.login(email, password);
+      // Zapisz tokeny
+      if (data.tokens) {
+        localStorage.setItem('access_token', data.tokens.access);
+        localStorage.setItem('refresh_token', data.tokens.refresh);
+      }
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
+      return data;
     } catch (error) {
-      console.error('Register error:', error);
-      if (error.message.includes('Server returned non-JSON response')) {
-        throw new Error('Server error - please try again later');
-      }
+      console.error('Login error:', error);
       throw error;
     }
   },
