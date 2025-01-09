@@ -8,7 +8,12 @@ function App() {
   const isAuthenticated = authAPI.isAuthenticated();
 
   const handleLogin = () => {
-    window.location.href = '/app';
+    window.location.reload();
+  };
+
+  const handleLogout = () => {
+    authAPI.logout();
+    window.location.reload();
   };
 
   return (
@@ -40,7 +45,7 @@ function App() {
             !isAuthenticated ? (
               <Navigate to="/" replace />
             ) : (
-              <MainApp />
+              <MainApp onLogout={handleLogout} />
             )
           }
         />

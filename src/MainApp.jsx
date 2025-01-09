@@ -8,6 +8,7 @@ import ProfileDashboard from './components/profile/ProfileDashboard'
 import FriendChat from './components/features/FriendChat'
 import ChannelChat from './components/features/ChannelChat'
 import CreateServer from './components/features/CreateServer'
+import { useNavigate } from 'react-router-dom'
 
 const messages = [
   {
@@ -131,6 +132,11 @@ const appReducer = (state, action) => {
 const MainApp = ({ onLogout }) => {
   const [state, dispatch] = useReducer(appReducer, initialState)
 
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
 
   return (
     <>
@@ -149,7 +155,7 @@ const MainApp = ({ onLogout }) => {
         seeProfileHandler={() => dispatch({ type: ACTIONS.SHOW_PROFILE })}
         sendMessageHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
         callHandler={() => dispatch({ type: ACTIONS.SHOW_FRIEND_CHAT })}
-        onLogout={() => dispatch({ type: ACTIONS.LOGOUT })}
+        onLogout={handleLogout}
       />
     </>
   )

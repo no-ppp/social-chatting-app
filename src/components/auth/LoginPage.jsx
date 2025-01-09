@@ -4,13 +4,14 @@ import AnimatedBackground from '../common/AnimatedBackground';
 
 const ACTIONS = {
   SET_LOGIN_MODE: 'SET_LOGIN_MODE',
-  SET_FORM_DATA: 'SET_FORM_DATA',
-  SET_ERROR: 'SET_ERROR', 
+  SET_FORM_DATA: 'SET_FORM_DATA', 
+  SET_ERROR: 'SET_ERROR',
   SET_LOADING: 'SET_LOADING',
   RESET_FORM: 'RESET_FORM',
   SET_RESET_MODE: 'SET_RESET_MODE',
   TOGGLE_PASSWORD: 'TOGGLE_PASSWORD',
-  TOGGLE_CONFIRM_PASSWORD: 'TOGGLE_CONFIRM_PASSWORD'
+  TOGGLE_CONFIRM_PASSWORD: 'TOGGLE_CONFIRM_PASSWORD',
+  SET_REGISTRATION_ERRORS: 'SET_REGISTRATION_ERRORS'
 };
 
 const initialState = {
@@ -23,6 +24,12 @@ const initialState = {
     confirmPassword: '',
   },
   error: '',
+  registrationErrors: {
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  },
   isLoading: false,
   showPassword: false,
   showConfirmPassword: false
@@ -34,13 +41,15 @@ const reducer = (state, action) => {
       return {
         ...state,
         isLoginMode: action.payload,
-        isResetMode: false
+        isResetMode: false,
+        registrationErrors: initialState.registrationErrors
       };
     case ACTIONS.SET_RESET_MODE:
       return {
         ...state,
         isResetMode: action.payload,
-        isLoginMode: !action.payload
+        isLoginMode: !action.payload,
+        registrationErrors: initialState.registrationErrors
       };
     case ACTIONS.SET_FORM_DATA:
       return {
@@ -48,12 +57,24 @@ const reducer = (state, action) => {
         formData: {
           ...state.formData,
           [action.payload.name]: action.payload.value
+        },
+        registrationErrors: {
+          ...state.registrationErrors,
+          [action.payload.name]: ''
         }
       };
     case ACTIONS.SET_ERROR:
       return {
         ...state,
         error: action.payload
+      };
+    case ACTIONS.SET_REGISTRATION_ERRORS:
+      return {
+        ...state,
+        registrationErrors: {
+          ...state.registrationErrors,
+          ...action.payload
+        }
       };
     case ACTIONS.SET_LOADING:
       return {
@@ -64,7 +85,8 @@ const reducer = (state, action) => {
       return {
         ...state,
         formData: initialState.formData,
-        error: ''
+        error: '',
+        registrationErrors: initialState.registrationErrors
       };
     case ACTIONS.TOGGLE_PASSWORD:
       return {
@@ -81,9 +103,37 @@ const reducer = (state, action) => {
   }
 };
 
-const LoginPage = ({ onLogin }) => {
+const LoginPage = ({ onLogin, onRegister }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { isLoginMode, isResetMode, formData, error, isLoading, showPassword, showConfirmPassword } = state;
+  const { isLoginMode, isResetMode, formData, error, registrationErrors, isLoading, showPassword, showConfirmPassword } = state;
+
+  const validateRegistrationForm = () => {
+    const errors = {};
+    
+    if (!formData.username) {
+      errors.username = 'Username is required';
+    } else if (formData.username.length < 3) {
+      errors.username = 'Username must be at least 3 characters';
+    }
+
+    if (!formData.email) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    return errors;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,17 +148,15 @@ const LoginPage = ({ onLogin }) => {
       }
 
       if (!isLoginMode) {
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error('Passwords do not match');
-        }
-        if (formData.password.length < 8) {
-          throw new Error('Password must be at least 8 characters long');
+        const validationErrors = validateRegistrationForm();
+        if (Object.keys(validationErrors).length > 0) {
+          dispatch({ type: ACTIONS.SET_REGISTRATION_ERRORS, payload: validationErrors });
+          throw new Error('Please fix the form errors');
         }
         await authAPI.register(formData.email, formData.password, formData.username);
       }
 
       const response = await authAPI.login(formData.email, formData.password);
-      localStorage.setItem('token', response.access);
       const userData = await authAPI.getMe(response.access);
       onLogin(userData);
     } catch (error) {
@@ -179,9 +227,12 @@ const LoginPage = ({ onLogin }) => {
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border border-white/5 transition-all duration-300 hover:border-discord-blue/50"
+                    className={`w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border ${registrationErrors.username ? 'border-red-500' : 'border-white/5'} transition-all duration-300 hover:border-discord-blue/50`}
                     required
                   />
+                  {registrationErrors.username && (
+                    <p className="text-red-400 text-sm mt-1">{registrationErrors.username}</p>
+                  )}
                 </div>
               )}
 
@@ -195,9 +246,12 @@ const LoginPage = ({ onLogin }) => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border border-white/5 transition-all duration-300 hover:border-discord-blue/50"
+                  className={`w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border ${registrationErrors.email ? 'border-red-500' : 'border-white/5'} transition-all duration-300 hover:border-discord-blue/50`}
                   required
                 />
+                {registrationErrors.email && (
+                  <p className="text-red-400 text-sm mt-1">{registrationErrors.email}</p>
+                )}
               </div>
 
               {!isResetMode && (
@@ -212,7 +266,7 @@ const LoginPage = ({ onLogin }) => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className="w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border border-white/5 transition-all duration-300 hover:border-discord-blue/50"
+                      className={`w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border ${registrationErrors.password ? 'border-red-500' : 'border-white/5'} transition-all duration-300 hover:border-discord-blue/50`}
                       required
                     />
                     <button
@@ -232,6 +286,9 @@ const LoginPage = ({ onLogin }) => {
                       )}
                     </button>
                   </div>
+                  {registrationErrors.password && (
+                    <p className="text-red-400 text-sm mt-1">{registrationErrors.password}</p>
+                  )}
                 </div>
               )}
 
@@ -247,7 +304,7 @@ const LoginPage = ({ onLogin }) => {
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border border-white/5 transition-all duration-300 hover:border-discord-blue/50"
+                      className={`w-full bg-discord-dark/50 text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-discord-blue border ${registrationErrors.confirmPassword ? 'border-red-500' : 'border-white/5'} transition-all duration-300 hover:border-discord-blue/50`}
                       required
                     />
                     <button
@@ -267,6 +324,9 @@ const LoginPage = ({ onLogin }) => {
                       )}
                     </button>
                   </div>
+                  {registrationErrors.confirmPassword && (
+                    <p className="text-red-400 text-sm mt-1">{registrationErrors.confirmPassword}</p>
+                  )}
                 </div>
               )}
 

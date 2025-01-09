@@ -13,8 +13,7 @@ const initialState = {
     { id: 4, name: 'User 4', status: 'offline', activity: '', friend: true }
   ],
   userProfile: {
-    id: 0,
-    name: 'Current User',
+    ...JSON.parse(localStorage.getItem('user')),
     status: 'online',
     activity: 'Available',
     showStatusMenu: false
@@ -60,7 +59,13 @@ const reducer = (state, action) => {
 };
 
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    userProfile: {
+      ...initialState.userProfile,
+      name: JSON.parse(localStorage.getItem('user'))?.username || 'User',
+    }
+  });
   const menuRef = useRef(null);
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
