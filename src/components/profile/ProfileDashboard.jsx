@@ -1,26 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { friendsAPI } from '../../api/friends';
 import { usersAPI } from '../../api/users';
+import { friendsAPI } from '../../api/friends';
+
+const initialState = {
+    user: null,
+    addFriend: false,
+    loading: true,
+    error: null
+};
+
+function reducer(state, action) {
+    switch (action.type) {
+        case 'SET_LOADING':
+            return { ...state, loading: action.payload };
+        case 'SET_USER':
+            return { ...state, user: action.payload };
+        case 'SET_ERROR':
+            return { ...state, error: action.payload };
+        case 'SET_ADD_FRIEND':
+            return { ...state, addFriend: action.payload };
+        default:
+            return state;
+    }
+}
 
 const ProfileDashboard = () => {
     const { userId } = useParams();
-    const [user, setUser] = useState(null);
-    const [addFriend, setAddFriend] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const { user, addFriend, loading, error } = state;
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                setLoading(true);
+                dispatch({ type: 'SET_LOADING', payload: true });
                 const userData = await usersAPI.getUserById(userId);
-                setUser(userData);
+                dispatch({ type: 'SET_USER', payload: userData });
             } catch (error) {
-                setError('Failed to load user profile');
+                dispatch({ type: 'SET_ERROR', payload: 'Failed to load user profile' });
                 console.error('Error fetching user:', error);
             } finally {
-                setLoading(false);
+                dispatch({ type: 'SET_LOADING', payload: false });
             }
         };
 
@@ -30,18 +50,14 @@ const ProfileDashboard = () => {
     }, [userId]);
 
     const handleAddFriend = async () => {
-        if (!user?.id) {
-            console.error('No user ID provided');
-            return;
-        }
-
+        if(!user?.id) return;
         try {
             await friendsAPI.sendFriendRequest(user.id);
-            setAddFriend(true);
+            dispatch({ type: 'SET_ADD_FRIEND', payload: true });
         } catch (error) {
             console.error('Failed to send friend request:', error);
         }
-    };
+    }
 
     if (loading) {
         return (

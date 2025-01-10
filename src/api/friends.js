@@ -1,90 +1,90 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        throw new Error('No access token found');
+    }
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
+};
+
 export const friendsAPI = {
-  async sendFriendRequest(userId) {
-    try {
-      const response = await fetch(`${API_URL}/send_friend_request/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify({ receiver_id: userId })
-      });
+    async sendFriendRequest(id) {
+        try {
+            const response = await fetch(`${API_URL}/users/${id}/send_friend_request/`, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to send friend request');
-      }
+            const data = await response.json();
 
-      return data;
-    } catch (error) {
-      console.error('Send friend request error:', error);
-      throw error;
-    }
-  },
+            if (response.status === 200) {
+                return data;
+            }
 
-  async acceptFriendRequest(requestId) {
-    try {
-      const response = await fetch(`${API_URL}/accept_friend/${requestId}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            throw new Error(data.error || 'Błąd wysyłania zaproszenia');
+        } catch (error) {
+            console.error('Send friend request error:', error);
+            throw error;
         }
-      });
+    },
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to accept friend request');
-      }
+    async acceptFriendRequest(requestId) {
+        try {
+            const response = await fetch(`${API_URL}/accept_friend/${requestId}/`, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
 
-      return data;
-    } catch (error) {
-      console.error('Accept friend request error:', error);
-      throw error;
-    }
-  },
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to accept friend request');
+            }
 
-  async rejectFriendRequest(requestId) {
-    try {
-      const response = await fetch(`${API_URL}/reject_friend/${requestId}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            return data;
+        } catch (error) {
+            console.error('Accept friend request error:', error);
+            throw error;
         }
-      });
+    },
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to reject friend request');
-      }
+    async rejectFriendRequest(requestId) {
+        try {
+            const response = await fetch(`${API_URL}/reject_friend/${requestId}/`, {
+                method: 'POST',
+                headers: getAuthHeaders()
+            });
 
-      return data;
-    } catch (error) {
-      console.error('Reject friend request error:', error);
-      throw error;
-    }
-  },
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to reject friend request');
+            }
 
-  async getFriendRequests() {
-    try {
-      const response = await fetch(`${API_URL}/friend_requests/`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            return data;
+        } catch (error) {
+            console.error('Reject friend request error:', error);
+            throw error;
         }
-      });
+    },
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.detail || 'Failed to get friend requests');
-      }
+    async getFriendRequests() {
+        try {
+            const response = await fetch(`${API_URL}/friend_requests/`, {
+                headers: getAuthHeaders()
+            });
 
-      return data;
-    } catch (error) {
-      console.error('Get friend requests error:', error);
-      throw error;
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to get friend requests');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Get friend requests error:', error);
+            throw error;
+        }
     }
-  }
 }; 

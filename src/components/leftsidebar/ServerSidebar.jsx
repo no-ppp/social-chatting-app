@@ -1,7 +1,7 @@
 import React, { useReducer, useRef } from 'react';
 import SearchBar from '../features/SearchBar';
 import useClickOutside from '../../hooks/useClickOutside';
-
+import Notifications from '../features/Notifications';
 const ACTIONS = {
   SELECT_SERVER: 'select_server',
   TOGGLE_OWN_SERVER_OPTIONS: 'toggle_own_server_options'
@@ -123,8 +123,10 @@ const ServerSidebar = ({channelList, serverHandler, onClick, editServerHandler, 
         </div>
       </div>
 
-      <div className="mt-auto mb-3">
-        <div className="w-12 h-12 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl">
+      <div className="flex flex-col items-center space-y-5 mt-auto mb-3">
+        <Notifications />
+
+        <div className="w-12 h-12 mt-3 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl">
           <SearchBar />
           <div className="absolute left-0 w-1 h-0 group-hover:h-[20px] bg-white rounded-r-full transition-all duration-200" />
           {/* Search tooltip */}

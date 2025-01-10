@@ -1,6 +1,7 @@
 import { useReducer, useEffect } from 'react';
 import ServerSidebar from './ServerSidebar';
 import ChannelSidebar from './ChannelSidebar';
+import Notifications from '../features/Notifications';
 
 const initialState = {
   isChannelsVisible: false,
