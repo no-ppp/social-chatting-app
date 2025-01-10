@@ -9,7 +9,8 @@ const initialState = {
     user: null,
     addFriend: false,
     loading: true,
-    error: null
+    error: null,
+    isFriend: false
 };
 
 function reducer(state, action) {
@@ -22,6 +23,8 @@ function reducer(state, action) {
             return { ...state, error: action.payload };
         case 'SET_ADD_FRIEND':
             return { ...state, addFriend: action.payload };
+        case 'SET_IS_FRIEND':
+            return { ...state, isFriend: action.payload };
         default:
             return state;
     }
@@ -30,7 +33,7 @@ function reducer(state, action) {
 const ProfileDashboard = () => {
     const { userId } = useParams();
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { user, addFriend, loading, error } = state;
+    const { user, addFriend, loading, error, isFriend } = state;
     const [hasPendingRequest, setHasPendingRequest] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
 
@@ -54,7 +57,13 @@ const ProfileDashboard = () => {
                 console.log('Fetched user profile data:', userData);
                 dispatch({ type: 'SET_USER', payload: userData });
                 
-                // Sprawdź status przyjaźni
+                // Sprawdź czy są znajomymi
+                if (userData.friends && userData.friends.some(friend => friend.id === currentUserId)) {
+                    dispatch({ type: 'SET_IS_FRIEND', payload: true });
+                    return;
+                }
+                
+                // Sprawdź status przyjaźni tylko jeśli nie są znajomymi
                 try {
                     console.log('Checking friend request for user:', userId);
                     const response = await fetch(`${API_URL}/users/${userId}/friend-request/`, {
@@ -122,6 +131,7 @@ const ProfileDashboard = () => {
         try {
             await friendsAPI.acceptFriendRequest(userId);
             setHasPendingRequest(false);
+            dispatch({ type: 'SET_IS_FRIEND', payload: true });
         } catch (error) {
             console.error('Failed to accept friend request:', error);
         }
@@ -178,42 +188,44 @@ const ProfileDashboard = () => {
 
                 <div className="gap-6 max-w-full">
                     <div className="space-y-4 bg-discord-darker p-6 rounded-lg shadow-inner">
-                        {hasPendingRequest ? (
-                            <div className="flex flex-col">
-                                <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                                    <p className="text-white text-lg font-sm">Zaproszenie do znajomych</p>
-                                    <div className="flex gap-2">
-                                        <button 
-                                            onClick={handleAcceptFriend}
-                                            className="px-4 py-2 bg-discord-blue text-white rounded-md hover:bg-discord-blue-hover transition-colors"
-                                        >
-                                            Akceptuj
-                                        </button>
-                                        <button 
-                                            onClick={handleRejectFriend}
-                                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                                        >
-                                            Odrzuć
-                                        </button>
+                        {!isFriend && (
+                            hasPendingRequest ? (
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center border-b border-gray-700 pb-2">
+                                        <p className="text-white text-lg font-sm">Zaproszenie do znajomych</p>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={handleAcceptFriend}
+                                                className="px-4 py-2 bg-discord-blue text-white rounded-md hover:bg-discord-blue-hover transition-colors"
+                                            >
+                                                Akceptuj
+                                            </button>
+                                            <button 
+                                                onClick={handleRejectFriend}
+                                                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                                            >
+                                                Odrzuć
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col">
-                                <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                                    <p className="text-white text-lg font-sm">Add to friends</p>
-                                    <button 
-                                        onClick={handleAddFriend} 
-                                        disabled={addFriend}
-                                        className={`text-discord-blue hover:text-discord-blue-hover transition-colors ${addFriend ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
-                                    </button>
+                            ) : (
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center border-b border-gray-700 pb-2">
+                                        <p className="text-white text-lg font-sm">Add to friends</p>
+                                        <button 
+                                            onClick={handleAddFriend} 
+                                            disabled={addFriend}
+                                            className={`text-discord-blue hover:text-discord-blue-hover transition-colors ${addFriend ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    {addFriend && <p className="text-gray-400 text-lg font-sm">Friend request sent</p>}
                                 </div>
-                                {addFriend && <p className="text-gray-400 text-lg font-sm">Friend request sent</p>}
-                            </div>
+                            )
                         )}
 
                         <div className="space-y-2">
