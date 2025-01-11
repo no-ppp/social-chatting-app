@@ -153,5 +153,22 @@ export const friendsAPI = {
             console.error('Get friend request error:', error);
             return null;
         }
+    },
+    async getFriends(userId) {
+        try {
+            const response = await fetch(`${API_URL}/users/${userId}/friends/`, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+            if (!response.ok) {
+                throw new Error('Failed to get friends');
+            }
+            const data = await response.json();
+            return data;
+
+        } catch (error) {
+            console.error('Get friends error:', error);
+            throw error;
+        }
     }
 }; 
