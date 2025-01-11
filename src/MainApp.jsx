@@ -12,7 +12,6 @@ const MainApp = ({ onLogout }) => {
     return (
         <div className="flex h-screen bg-discord-gray">
             <LeftSidebar 
-                onLogout={onLogout}
                 selectedServer={selectedServer}
                 setSelectedServer={setSelectedServer}
                 setSelectedChannel={setSelectedChannel}
@@ -36,10 +35,12 @@ const MainApp = ({ onLogout }) => {
                 <Route path="/profile/:userId" element={
                     <>
                         <ProfileDashboard />
-                        <RightSidebar />
                     </>
                 } />
             </Routes>
+            <RightSidebar 
+                onLogout={onLogout}
+            />
         </div>
     );
 };
