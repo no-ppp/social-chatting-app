@@ -141,28 +141,33 @@ const LoginPage = ({ onLogin, onRegister }) => {
     dispatch({ type: ACTIONS.SET_LOADING, payload: true });
 
     try {
-      if (isResetMode) {
-        await authAPI.resetPassword(formData.email);
-        dispatch({ type: ACTIONS.SET_ERROR, payload: 'Password reset link has been sent to your email' });
-        return;
-      }
-
-      if (!isLoginMode) {
-        const validationErrors = validateRegistrationForm();
-        if (Object.keys(validationErrors).length > 0) {
-          dispatch({ type: ACTIONS.SET_REGISTRATION_ERRORS, payload: validationErrors });
-          throw new Error('Please fix the form errors');
+        if (isResetMode) {
+            // TODO: Implement reset password functionality
+            dispatch({ type: ACTIONS.SET_ERROR, payload: 'Password reset link has been sent to your email' });
+            return;
         }
-        await authAPI.register(formData.email, formData.password, formData.username);
-      }
 
-      const response = await authAPI.login(formData.email, formData.password);
-      const userData = await authAPI.getMe(response.access);
-      onLogin(userData);
+        if (!isLoginMode) {
+            const validationErrors = validateRegistrationForm();
+            if (Object.keys(validationErrors).length > 0) {
+                dispatch({ type: ACTIONS.SET_REGISTRATION_ERRORS, payload: validationErrors });
+                throw new Error('Please fix the form errors');
+            }
+            
+            throw new Error('Registration not implemented yet');
+        }
+
+        
+        const response = await authAPI.login(formData.email, formData.password);
+        
+        
+        if (response) {
+            window.location.href = '/app'; 
+        }
     } catch (error) {
-      dispatch({ type: ACTIONS.SET_ERROR, payload: error.message });
+        dispatch({ type: ACTIONS.SET_ERROR, payload: error.message || 'Login failed' });
     } finally {
-      dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+        dispatch({ type: ACTIONS.SET_LOADING, payload: false });
     }
   };
 

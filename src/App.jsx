@@ -13,7 +13,6 @@ function App() {
 
   const handleLogout = () => {
     authAPI.logout();
-    window.location.reload();
   };
 
   return (

@@ -1,19 +1,14 @@
-import { useReducer, useRef, useEffect } from 'react';
+import { useReducer, useRef, useEffect, useState } from 'react';
 import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
+import { friendsAPI } from '../../api/friends';
 
 // Initial state for the sidebar
 const initialState = {
-  activeUsers: [
-    { id: 1, name: 'User 1', status: 'online', activity: 'Playing Minecraft', friend: true },
-    { id: 2, name: 'User 2', status: 'idle', activity: 'Listening to Spotify', friend: true },
-    { id: 3, name: 'User 3', status: 'dnd', activity: 'Streaming', friend: true }
-  ],
-  offlineUsers: [
-    { id: 4, name: 'User 4', status: 'offline', activity: '', friend: true }
-  ],
+  activeUsers: [],
+  offlineUsers: [],
   userProfile: {
-    ...JSON.parse(localStorage.getItem('user')),
+    username: 'User',
     status: 'online',
     activity: 'Available',
     showStatusMenu: false
@@ -25,6 +20,12 @@ const initialState = {
 // Reducer to handle state updates
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'SET_FRIENDS':
+      return {
+        ...state,
+        activeUsers: action.payload.filter(friend => friend.status !== 'offline'),
+        offlineUsers: action.payload.filter(friend => friend.status === 'offline')
+      };
     case 'TOGGLE_MENU':
       return { ...state, isMenuOpen: !state.isMenuOpen, selectedUser: null };
     case 'SET_SELECTED_USER':
@@ -59,17 +60,71 @@ const reducer = (state, action) => {
 };
 
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
+  // Bezpieczne pobieranie danych użytkownika
+  const getUserFromLocalStorage = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return null;
+      return JSON.parse(userStr);
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
+  };
+
+  // Inicjalizacja stanu z bezpiecznym parsowaniem
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     userProfile: {
       ...initialState.userProfile,
-      name: JSON.parse(localStorage.getItem('user'))?.username || 'User',
+      ...(getUserFromLocalStorage() || {}),
     }
   });
   const menuRef = useRef(null);
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
   const userMenuRef = useRef(null);
+  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        setLoading(true);
+        const userStr = localStorage.getItem('user');
+        
+        if (!userStr) {
+          console.log('No user found in localStorage');
+          return;
+        }
+
+        let user;
+        try {
+          user = JSON.parse(userStr);
+        } catch (e) {
+          console.error('Failed to parse user data:', e);
+          return;
+        }
+
+        if (!user?.id) {
+          console.log('No user ID found:', user);
+          return;
+        }
+
+        const data = await friendsAPI.getFriends(user.id);
+        setFriends(data || []);
+        dispatch({ type: 'SET_FRIENDS', payload: data || [] });
+      } catch (error) {
+        console.error('Failed to fetch friends:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFriends();
+  }, []);
 
   useClickOutside(menuRef, state.isMenuOpen, () => dispatch({ type: 'CLOSE_MENU' }));
   useClickOutside(userMenuRef, state.selectedUser !== null, () => dispatch({ type: 'CLOSE_USER_MENU' }));
@@ -180,12 +235,12 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
     >
       <div className="relative">
         <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
-          {user.name.charAt(0)}
+          {user.username?.charAt(0)}
         </div>
         <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(user.status)} shadow-md`} />
       </div>
       <div className="ml-4 flex-1">
-        <div className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors">{user.name}</div>
+        <div className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors">{user.username}</div>
         {user.activity && <div className="text-xs text-gray-400 mt-0.5 italic">{user.activity}</div>}
       </div>
       {state.selectedUser?.id === user.id && (
@@ -216,13 +271,13 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       >
         <div className="relative">
           <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
-            {state.userProfile.name.charAt(0)}
+            {state.userProfile.username?.charAt(0)}
           </div>
           <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(state.userProfile.status)} shadow-md`} />
         </div>
         <div className="ml-4 flex-1">
           <div className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">
-            {state.userProfile.name}
+            {state.userProfile.username}
           </div>
           <div className="text-xs text-gray-400 mt-0.5 italic">{state.userProfile.activity}</div>
         </div>
