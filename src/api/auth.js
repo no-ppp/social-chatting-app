@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {webSocketService} from '../websockets/WebSocketService'
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -117,15 +118,12 @@ export const isTokenValid = (token) => {
 export const authAPI = {
     async login(email, password) {
         try {
-            console.log('Attempting login with:', { email }); // nie loguj hasła!
+            console.log('Attempting login with:', { email });
             
             const response = await axiosInstance.post('/login/', {
                 email,
                 password
             });
-
-            console.log('Raw login response:', response); // Debug
-            console.log('Login response data:', response.data); // Debug
 
             if (response.data) {
                 const { tokens, user } = response.data;
@@ -137,20 +135,19 @@ export const authAPI = {
 
                 const { access, refresh } = tokens;
 
-                // Zapisz tokeny
+                // Najpierw zapisz tokeny i dane użytkownika
                 localStorage.setItem('access_token', access);
                 localStorage.setItem('refresh_token', refresh);
-                
-                // Zapisz dane użytkownika
-                if (user) {
-                    localStorage.setItem('user', JSON.stringify(user));
-                }
+                localStorage.setItem('user', JSON.stringify(user));
 
                 // Ustaw token w axiosInstance
                 axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access}`;
                 
-                console.log('Access token saved:', access); // Debug
-                console.log('Current headers:', axiosInstance.defaults.headers); // Debug
+                // Poczekaj chwilę przed połączeniem WebSocket
+                
+                console.log('Próba połączenia WebSocket po zalogowaniu...');
+                webSocketService.connect();
+                
                 
                 return {
                     user,
@@ -180,7 +177,7 @@ export const authAPI = {
                 localStorage.removeItem('refresh_token');
                 localStorage.removeItem('user');
                 localStorage.clear(); // dla pewności czyścimy wszystko
-                
+                webSocketService.disconnect();
                 // Czyszczenie headers w axiosInstance
                 delete axiosInstance.defaults.headers.common['Authorization'];
                 axiosInstance.defaults.headers.common = {
@@ -188,10 +185,6 @@ export const authAPI = {
                 };
                 
                 console.log('Local data cleared successfully');
-            };
-            const redirectToLogin = () => {
-                console.log('Redirecting to login page...');
-                window.location.href = '/login';
             };
 
             try {
@@ -207,11 +200,11 @@ export const authAPI = {
                 // Kontynuujemy proces nawet przy błędzie serwera
             }
 
-            // Czyścimy dane i przekierowujemy z małym opóźnieniem
+            // Czyścimy dane i przekierowujemy
             clearLocalData();
             
-            // Dodajemy małe opóźnienie przed przekierowaniem
-            setTimeout(redirectToLogin, 100);
+            // Używamy window.location.href zamiast navigate
+            window.location.href = '/login';
 
         } catch (error) {
             console.error('Logout process error:', error);

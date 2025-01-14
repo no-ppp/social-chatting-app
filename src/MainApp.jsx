@@ -17,27 +17,25 @@ const MainApp = ({ onLogout }) => {
                 setSelectedChannel={setSelectedChannel}
             />
             
-            <Routes>
-                <Route path="/" element={
-                    <div className="flex-1 flex justify-center items-center text-white">
-                        Select a channel to start chatting
-                    </div>
-                } />
-                <Route path="/channels/:serverId/:channelId" element={
-                    <>
+            <div className="flex-1 flex">
+                <Routes>
+                    <Route path="/" element={
+                        <div className="flex-1 flex justify-center items-center text-white">
+                            Select a channel to start chatting
+                        </div>
+                    } />
+                    <Route path="/channels/:serverId/:channelId" element={
                         <Chat 
                             selectedChannel={selectedChannel}
                             selectedServer={selectedServer}
                         />
-                        <RightSidebar />
-                    </>
-                } />
-                <Route path="/profile/:userId" element={
-                    <>
+                    } />
+                    <Route path="/profile/:userId" element={
                         <ProfileDashboard />
-                    </>
-                } />
-            </Routes>
+                    } />
+                </Routes>
+            </div>
+            
             <RightSidebar 
                 onLogout={onLogout}
             />

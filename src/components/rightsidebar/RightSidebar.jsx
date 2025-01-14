@@ -1,7 +1,8 @@
-import { useReducer, useRef, useEffect, useState } from 'react';
+import { useReducer, useRef, useEffect, useState, useCallback } from 'react';
 import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { friendsAPI } from '../../api/friends';
+import { useNavigate } from 'react-router-dom';
 
 // Initial state for the sidebar
 const initialState = {
@@ -54,12 +55,51 @@ const reducer = (state, action) => {
                    action.payload === 'dnd' ? 'Do Not Disturb' : 'Offline'
         }
       };
+    case 'UPDATE_USER_STATUS':
+      console.log('Reducer: UPDATE_USER_STATUS', action.payload);
+      
+      // Znajdź użytkownika w obu listach
+      const userInActive = state.activeUsers.find(user => user.id === action.payload.userId);
+      const userInOffline = state.offlineUsers.find(user => user.id === action.payload.userId);
+      
+      let newActiveUsers = [...state.activeUsers];
+      let newOfflineUsers = [...state.offlineUsers];
+
+      if (action.payload.isOnline) {
+        // Jeśli użytkownik jest online, przenieś go do aktywnych
+        if (userInOffline) {
+          newOfflineUsers = newOfflineUsers.filter(user => user.id !== action.payload.userId);
+          newActiveUsers.push({...userInOffline, status: 'online'});
+        } else if (userInActive) {
+          newActiveUsers = newActiveUsers.map(user =>
+            user.id === action.payload.userId ? {...user, status: 'online'} : user
+          );
+        }
+      } else {
+        // Jeśli użytkownik jest offline, przenieś go do offline
+        if (userInActive) {
+          newActiveUsers = newActiveUsers.filter(user => user.id !== action.payload.userId);
+          newOfflineUsers.push({...userInActive, status: 'offline'});
+        } else if (userInOffline) {
+          newOfflineUsers = newOfflineUsers.map(user =>
+            user.id === action.payload.userId ? {...user, status: 'offline'} : user
+          );
+        }
+      }
+
+      return {
+        ...state,
+        activeUsers: newActiveUsers,
+        offlineUsers: newOfflineUsers
+      };
     default:
       return state;
   }
 };
 
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
+  const navigate = useNavigate();
+  
   // Bezpieczne pobieranie danych użytkownika
   const getUserFromLocalStorage = () => {
     try {
@@ -87,6 +127,39 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const updateUserStatus = useCallback((userId, isOnline) => {
+    console.log('Aktualizacja statusu użytkownika:', userId, isOnline);
+    
+    dispatch({
+      type: 'UPDATE_USER_STATUS',
+      payload: {
+        userId: userId,
+        isOnline: isOnline
+      }
+    });
+  }, [dispatch]);
+
+  useEffect(() => {
+    const handleStatusUpdate = (data) => {
+      console.log('Otrzymano aktualizację statusu:', data);
+      
+      // Sprawdź, czy dane zawierają potrzebne informacje
+      if (data.user_id && data.is_online !== undefined) {
+        console.log('Aktualizuję status dla użytkownika:', data.user_id, data.is_online);
+        updateUserStatus(data.user_id, data.is_online);
+      }
+    };
+
+    // Subskrybuj aktualizacje statusu
+    
+    const unsubscribe = webSocketService.subscribeToStatus(handleStatusUpdate);
+    
+
+    return () => {
+      unsubscribe();
+    };
+  }, [updateUserStatus]);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -156,7 +229,27 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   // Handle user selection
   const handleUserClick = (user, event) => {
     event.preventDefault();
+    event.stopPropagation();
     dispatch({ type: 'SET_SELECTED_USER', payload: user });
+  };
+
+  // Handle profile view
+  const handleProfileView = (userId) => {
+    console.log('Attempting to view profile for user:', userId);
+    try {
+      // Najpierw zamknij menu
+      dispatch({ type: 'CLOSE_USER_MENU' });
+      dispatch({ type: 'CLOSE_MENU' });
+      
+      // Małe opóźnienie przed nawigacją
+      setTimeout(() => {
+        console.log('Navigating to:', `/profile/${userId}`);
+        navigate(`/app/profile/${userId}`);
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error navigating to profile:', error);
+    }
   };
 
   // Render user profile status menu
@@ -230,7 +323,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
     <div 
       key={user.id} 
       ref={state.selectedUser?.id === user.id ? selectedUserRef : null}
-      className={`relative flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer group transition-all duration-200 ${user.status === 'offline' ? 'opacity-50' : ''}`} 
+      className={`relative flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer group transition-all duration-200`} 
       onClick={(e) => handleUserClick(user, e)}
     >
       <div className="relative">
@@ -244,13 +337,20 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
         {user.activity && <div className="text-xs text-gray-400 mt-0.5 italic">{user.activity}</div>}
       </div>
       {state.selectedUser?.id === user.id && (
-        <div ref={userMenuRef}>
+        <div 
+          ref={userMenuRef}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute z-[100]"
+        >
           <UserMobileMenu
             user={user} 
             position={{ x: 0, y: '100%' }}
-            seeProfileHandler={seeProfileHandler}
-            callHandler={callHandler}
-            sendMessageHandler={sendMessageHandler}
+            seeProfileHandler={() => {
+              console.log('Profile handler clicked for user:', user.id);
+              handleProfileView(user.id);
+            }}
+            callHandler={() => callHandler(user.id)}
+            sendMessageHandler={() => sendMessageHandler(user.id)}
           />
         </div>
       )}
@@ -290,11 +390,12 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
     <>
       {/* Mobile menu toggle button */}
       <button 
-        onClick={() => { 
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
           dispatch({ type: 'TOGGLE_MENU' });
         }}
         type="button"
-        data-close-button  // <- it is from useClickOutside hook to prevent outside click
         className="fixed right-4 top-4 md:hidden z-50 bg-discord-dark p-2 rounded-lg"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

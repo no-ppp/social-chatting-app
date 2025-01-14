@@ -3,14 +3,14 @@ import { useParams } from 'react-router-dom';
 import { usersAPI } from '../../api/users';
 import { friendsAPI } from '../../api/friends';
 
-const API_URL = 'http://127.0.0.1:8000/api';
 
 const initialState = {
     user: null,
     addFriend: false,
     loading: true,
     error: null,
-    isFriend: false
+    isFriend: false,
+    requestError: null
 };
 
 function reducer(state, action) {
@@ -25,6 +25,8 @@ function reducer(state, action) {
             return { ...state, addFriend: action.payload };
         case 'SET_IS_FRIEND':
             return { ...state, isFriend: action.payload };
+        case 'SET_REQUEST_ERROR':
+            return { ...state, requestError: action.payload };
         default:
             return state;
     }
@@ -33,7 +35,7 @@ function reducer(state, action) {
 const ProfileDashboard = () => {
     const { userId } = useParams();
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { user, addFriend, loading, error, isFriend } = state;
+    const { user, addFriend, loading, error, isFriend, requestError } = state;
     const [hasPendingRequest, setHasPendingRequest] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
 
@@ -57,48 +59,29 @@ const ProfileDashboard = () => {
                 console.log('Fetched user profile data:', userData);
                 dispatch({ type: 'SET_USER', payload: userData });
                 
-                // Sprawdź czy są znajomymi
-                if (userData.friends && userData.friends.some(friend => friend.id === currentUserId)) {
-                    dispatch({ type: 'SET_IS_FRIEND', payload: true });
-                    return;
-                }
+                // Pobierz listę znajomych zalogowanego użytkownika
+                const currentUserFriends = await friendsAPI.getFriends(currentUserId);
+                console.log('Current user friends:', currentUserFriends);
                 
-                // Sprawdź status przyjaźni tylko jeśli nie są znajomymi
-                try {
-                    console.log('Checking friend request for user:', userId);
-                    const response = await fetch(`${API_URL}/users/${userId}/friend-request/`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                // Sprawdź czy oglądany profil należy do znajomych
+                const isAlreadyFriend = currentUserFriends.some(friend => friend.id === parseInt(userId));
+                console.log('Is already friend:', isAlreadyFriend);
+                dispatch({ type: 'SET_IS_FRIEND', payload: isAlreadyFriend });
+
+                // Sprawdź oczekujące zaproszenia do znajomych
+                if (!isAlreadyFriend) {
+                    const pendingRequests = await friendsAPI.getPendingFriendRequests();
+                    console.log('Pending friend requests:', pendingRequests);
                     
-                    console.log('Friend request response:', response);
+                    const hasPending = pendingRequests.some(request => 
+                        (request.sender.id === parseInt(userId) && request.receiver.id === currentUserId) ||
+                        (request.sender.id === currentUserId && request.receiver.id === parseInt(userId))
+                    );
                     
-                    if (response.ok) {
-                        const friendRequestData = await response.json();
-                        console.log('Friend request data:', friendRequestData);
-                        
-                        // Sprawdź czy zalogowany użytkownik jest odbiorcą zaproszenia
-                        const isReceiver = friendRequestData.receiver.id === currentUserId && 
-                                         friendRequestData.status === 'pending';
-                        
-                        console.log('Friend request status:', {
-                            isReceiver,
-                            currentUserId,
-                            receiverId: friendRequestData.receiver.id,
-                            status: friendRequestData.status
-                        });
-                        
-                        setHasPendingRequest(isReceiver);
-                    } else {
-                        console.log('No friend request found:', response.status);
-                        setHasPendingRequest(false);
+                    setHasPendingRequest(hasPending);
+                    if (hasPending) {
+                        dispatch({ type: 'SET_ADD_FRIEND', payload: true });
                     }
-                } catch (error) {
-                    console.log('Error checking friend request:', error);
-                    setHasPendingRequest(false);
                 }
                 
             } catch (error) {
@@ -109,21 +92,28 @@ const ProfileDashboard = () => {
             }
         };
 
-        if (userId && currentUserId) {
+        if (userId && currentUserId && userId !== currentUserId.toString()) {
             console.log('Conditions met, calling fetchData:', { userId, currentUserId });
             fetchData();
         } else {
             console.log('Waiting for userId and currentUserId:', { userId, currentUserId });
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     }, [userId, currentUserId]);
 
     const handleAddFriend = async () => {
         if (!user?.id) return;
+        if (addFriend) {
+            dispatch({ type: 'SET_REQUEST_ERROR', payload: 'Już wysłałeś zaproszenie do tego użytkownika' });
+            return;
+        }
         try {
             await friendsAPI.sendFriendRequest(user.id);
             dispatch({ type: 'SET_ADD_FRIEND', payload: true });
+            dispatch({ type: 'SET_REQUEST_ERROR', payload: null });
         } catch (error) {
             console.error('Failed to send friend request:', error);
+            dispatch({ type: 'SET_REQUEST_ERROR', payload: 'You already sent a friend request to this user' });
         }
     };
 
@@ -143,6 +133,15 @@ const ProfileDashboard = () => {
             setHasPendingRequest(false);
         } catch (error) {
             console.error('Failed to reject friend request:', error);
+        }
+    };
+
+    const handleRemoveFriend = async () => {
+        try {
+            await friendsAPI.deleteFriendRequest(userId);
+            dispatch({ type: 'SET_IS_FRIEND', payload: false });
+        } catch (error) {
+            console.error('Failed to remove friend:', error);
         }
     };
 
@@ -179,7 +178,7 @@ const ProfileDashboard = () => {
                         <p className="text-discord-blue text-lg mb-1">User ID:</p>
                         <p className="text-gray-400 text-md">{user.id}</p>
                         <div className="flex items-center mt-2">
-                            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                            <div className={`w-3 h-3 rounded-full ${user.status === 'online' ? 'bg-green-500' : 'bg-gray-500'} mr-2`}></div>
                             <span className="text-gray-300">{user.status || 'Offline'}</span>
                         </div>
                         <p className="text-gray-300">{user.email}</p>
@@ -188,8 +187,20 @@ const ProfileDashboard = () => {
 
                 <div className="gap-6 max-w-full">
                     <div className="space-y-4 bg-discord-darker p-6 rounded-lg shadow-inner">
-                        {!isFriend && (
-                            hasPendingRequest ? (
+                        {userId !== currentUserId?.toString() && (
+                            isFriend ? (
+                                <div className="flex flex-col">
+                                    <div className="flex justify-between items-center border-b border-gray-700 pb-2">
+                                        <p className="text-white text-lg font-sm">Usuń ze znajomych</p>
+                                        <button 
+                                            onClick={handleRemoveFriend}
+                                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                                        >
+                                            Usuń znajomego
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : hasPendingRequest ? (
                                 <div className="flex flex-col">
                                     <div className="flex justify-between items-center border-b border-gray-700 pb-2">
                                         <p className="text-white text-lg font-sm">Zaproszenie do znajomych</p>
@@ -224,6 +235,7 @@ const ProfileDashboard = () => {
                                         </button>
                                     </div>
                                     {addFriend && <p className="text-gray-400 text-lg font-sm">Friend request sent</p>}
+                                    {requestError && <p className="text-red-500 text-lg font-sm mt-2">{requestError}</p>}
                                 </div>
                             )
                         )}

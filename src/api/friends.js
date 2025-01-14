@@ -31,9 +31,9 @@ export const friendsAPI = {
 
     async sendFriendRequest(userId) {
         try {
-            const response = await axiosInstance.post('/friend-requests/', {
-                to_user: userId
-            });
+            console.log('Sending friend request to userId:', userId);
+            const response = await axiosInstance.post(`/users/${userId}/send-friend-request/`);
+            console.log('Send friend request response:', response.data);
             return response.data;
         } catch (error) {
             console.error('Send friend request error:', error);
@@ -43,7 +43,7 @@ export const friendsAPI = {
 
     async acceptFriendRequest(requestId) {
         try {
-            const response = await axiosInstance.post(`/friend-requests/${requestId}/accept/`);
+            const response = await axiosInstance.post(`/users/${requestId}/accept-friend-request/`);
             return response.data;
         } catch (error) {
             console.error('Accept friend request error:', error);
@@ -77,6 +77,24 @@ export const friendsAPI = {
             return response.data;
         } catch (error) {
             console.error('Remove friend error:', error);
+            throw error;
+        }
+    },
+    async getPendingFriendRequests() {
+        try {
+            const response = await axiosInstance.get('/users/pending-requests/');
+            return response.data;
+        } catch (error) {
+            console.error('Get pending friend requests error:', error);
+            throw error;
+        }
+    },
+    async deleteFriendRequest(userId) {
+        try {
+            const response = await axiosInstance.post(`/users/${userId}/remove-friend/`);
+            return response.data;
+        } catch (error) {
+            console.error('Delete friend request error:', error);
             throw error;
         }
     }
