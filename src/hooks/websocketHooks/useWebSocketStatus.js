@@ -5,11 +5,17 @@ const useWebSocketStatus = () => {
     const [onlineUsers, setOnlineUsers] = useState(new Set());
 
     useEffect(() => {
-        console.log('🔵 useUserStatus hook initialized');
+        console.log('🔵 useWebSocketStatus hook initialized');
 
-        const handleStatusUpdate = (data) => {
-            console.log('🟢 Status update received in hook:', data);
-            if (data.type === 'status_update') {
+        const handleMessage = (data) => {
+            console.log('📩 Message received in hook:', data);
+            
+            if (data.type === 'group_users') {
+                console.log('📋 Initial users list received:', data.users);
+                setOnlineUsers(new Set(data.users));
+            }
+            else if (data.type === 'status_update') {
+                console.log('🟢 Status update received:', data);
                 setOnlineUsers(prev => {
                     const newSet = new Set(prev);
                     if (data.status === 'online') {
@@ -24,13 +30,13 @@ const useWebSocketStatus = () => {
             }
         };
 
-        // Dodaj listener do konkretnego typu eventu
-        WebSocketService.addListener('message', handleStatusUpdate);
+        // Dodaj listener do wiadomości
+        WebSocketService.addListener('message', handleMessage);
         
         // Cleanup
         return () => {
-            console.log('🔴 Removing status update listener');
-            WebSocketService.removeListener('message', handleStatusUpdate);
+            console.log('🔴 Removing message listener');
+            WebSocketService.removeListener('message', handleMessage);
         };
     }, []);
 

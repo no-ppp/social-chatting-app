@@ -1,9 +1,9 @@
-import { useReducer, useRef, useEffect, useState, useCallback } from 'react';
+import { useReducer, useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
-import { friendsAPI } from '../../api/friends';
 import { useNavigate } from 'react-router-dom';
 import useWebSocketStatus from '../../hooks/websocketHooks/useWebSocketStatus';
+import useFetchFriends from '../../hooks/ApiHooks/useFetchFriends';
 
 // Initial state for the sidebar
 const initialState = {
@@ -89,50 +89,16 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
   const userMenuRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  
 
-  // Implementacja useWebSocketStatus
+  const { friends } = useFetchFriends(dispatch);
+  
   const { onlineUsers } = useWebSocketStatus();
-  const  activeUsers = state.friends.filter(friend => onlineUsers.has(friend.id));
-  const  offlineUsers = state.friends.filter(friend => !onlineUsers.has(friend.id));
+  
+  const activeUsers = state.friends.filter(friend => onlineUsers.has(friend.id));
+  const offlineUsers = state.friends.filter(friend => !onlineUsers.has(friend.id));
 
-  useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        setLoading(true);
-        const userStr = localStorage.getItem('user');
-        
-        if (!userStr) {
-          console.log('No user found in localStorage');
-          return;
-        }
 
-        let user;
-        try {
-          user = JSON.parse(userStr);
-        } catch (e) {
-          console.error('Failed to parse user data:', e);
-          return;
-        }
-
-        if (!user?.id) {
-          console.log('No user ID found:', user);
-          return;
-        }
-
-        const data = await friendsAPI.getFriends(user.id);
-        dispatch({ type: 'SET_FRIENDS', payload: data || [] });
-      } catch (error) {
-        console.error('Failed to fetch friends:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFriends();
-  }, []);
 
   useClickOutside(menuRef, state.isMenuOpen, () => dispatch({ type: 'CLOSE_MENU' }));
   useClickOutside(userMenuRef, state.selectedUser !== null, () => dispatch({ type: 'CLOSE_USER_MENU' }));
@@ -254,72 +220,90 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   );
 
   // Render individual user component
-  const renderUser = (user) => (
-    <div 
-      key={user.id} 
-      ref={state.selectedUser?.id === user.id ? selectedUserRef : null}
-      className={`relative flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer group transition-all duration-200`} 
-      onClick={(e) => handleUserClick(user, e)}
-    >
-      <div className="relative">
-        <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
-          {user.username?.charAt(0)}
-        </div>
-        <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(user.status)} shadow-md`} />
-      </div>
-      <div className="ml-4 flex-1">
-        <div className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors">{user.username}</div>
-        {user.activity && <div className="text-xs text-gray-400 mt-0.5 italic">{user.activity}</div>}
-      </div>
-      {state.selectedUser?.id === user.id && (
+  const renderUser = (user) => {
+    // Sprawdzamy status użytkownika z WebSocketService
+    const userStatus = user.status;
+
+    return (
         <div 
-          ref={userMenuRef}
-          onClick={(e) => e.stopPropagation()}
-          className="absolute z-[100]"
+            key={user.id} 
+            ref={state.selectedUser?.id === user.id ? selectedUserRef : null}
+            className={`relative flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer group transition-all duration-200`} 
+            onClick={(e) => handleUserClick(user, e)}
         >
-          <UserMobileMenu
-            user={user} 
-            position={{ x: 0, y: '100%' }}
-            seeProfileHandler={() => {
-              console.log('Profile handler clicked for user:', user.id);
-              handleProfileView(user.id);
-            }}
-            callHandler={() => callHandler(user.id)}
-            sendMessageHandler={() => sendMessageHandler(user.id)}
-          />
+            <div className="relative">
+                <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
+                    {user.username?.charAt(0)}
+                </div>
+                <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(userStatus)} shadow-md`} />
+            </div>
+            <div className="ml-4 flex-1">
+                <div className="text-sm font-semibold text-gray-300 group-hover:text-white transition-colors">
+                    {user.username}
+                </div>
+                <div className="text-xs text-gray-400">
+                    {userStatus === 'online' ? 'Online' : 'Offline'}
+                </div>
+            </div>
+            {state.selectedUser?.id === user.id && (
+                <div 
+                    ref={userMenuRef}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute z-[100]"
+                >
+                    <UserMobileMenu
+                        user={{...user, status: userStatus}}
+                        position={{ x: 0, y: '100%' }}
+                        seeProfileHandler={() => {
+                            console.log('Profile handler clicked for user:', user.id);
+                            handleProfileView(user.id);
+                        }}
+                        callHandler={() => callHandler(user.id)}
+                        sendMessageHandler={() => sendMessageHandler(user.id)}
+                    />
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
+};
 
   // Render user profile
-  const renderUserProfile = () => (
-    <div className="relative">
-      <div 
-        className="flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-all duration-200"
-        onClick={(e) => {
-          e.stopPropagation();
-          dispatch({ type: 'TOGGLE_STATUS_MENU' });
-        }}
-        type="button"
-        data-close-button
-      >
+  const renderUserProfile = () => {
+    // Pobierz ID zalogowanego użytkownika
+    const currentUser = getUserFromLocalStorage();
+    const isOnline = currentUser ? onlineUsers.has(currentUser.id) : false;
+    const currentStatus = isOnline ? 'online' : 'offline';
+
+    return (
         <div className="relative">
-          <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
-            {state.userProfile.username?.charAt(0)}
-          </div>
-          <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(state.userProfile.status)} shadow-md`} />
+            <div 
+                className="flex items-center p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-all duration-200"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    dispatch({ type: 'TOGGLE_STATUS_MENU' });
+                }}
+                type="button"
+                data-close-button
+            >
+                <div className="relative">
+                    <div className="w-10 h-10 bg-discord-dark rounded-full flex items-center justify-center text-lg font-medium shadow-lg">
+                        {state.userProfile.username?.charAt(0)}
+                    </div>
+                    <div className={`absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-discord-sidebar ${getStatusColor(currentStatus)} shadow-md`} />
+                </div>
+                <div className="ml-4 flex-1">
+                    <div className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">
+                        {state.userProfile.username}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5 italic">
+                        {isOnline ? 'Online' : 'Offline'}
+                    </div>
+                </div>
+            </div>
+            {state.userProfile.showStatusMenu && renderStatusMenu()}
         </div>
-        <div className="ml-4 flex-1">
-          <div className="text-sm font-semibold text-gray-300 hover:text-white transition-colors">
-            {state.userProfile.username}
-          </div>
-          <div className="text-xs text-gray-400 mt-0.5 italic">{state.userProfile.activity}</div>
-        </div>
-      </div>
-      {state.userProfile.showStatusMenu && renderStatusMenu()}
-    </div>
-  );
+    );
+};
 
   return (
     <>
@@ -365,9 +349,13 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
           <div className="bg-discord-dark rounded-lg p-3 shadow-md border border-gray-800 hover:border-gray-700 hover:bg-discord-dark/90 transition-all duration-200 mb-4">
             {renderUserProfile()}
           </div>
-          <h2 className="text-gray-400 uppercase text-xs font-bold mb-4 tracking-wider">Active Friends — {state.activeUsers.length}</h2>
+          <h2 className="text-gray-400 uppercase text-xs font-bold mb-4 tracking-wider">
+            Active Friends — {activeUsers.length}
+          </h2>
           <div className="space-y-2">{activeUsers.map(renderUser)}</div>
-          <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {state.offlineUsers.length}</h2>
+          <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">
+            Offline — {offlineUsers.length}
+          </h2>
           <div className="space-y-2">{offlineUsers.map(renderUser)}</div>
         </div>
       </div>
