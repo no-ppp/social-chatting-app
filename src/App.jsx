@@ -3,8 +3,7 @@ import LoginPage from './components/auth/LoginPage';
 import MainApp from './MainApp';
 import LandingPage from './components/landing/LandingPage';
 import { authAPI } from './api/auth';
-import { useEffect } from 'react';
-import webSocketService from './websockets/WebSocketService';
+import useWebSocketConnect from './hooks/websocketHooks/useWebSocketConnect';
 
 function App() {
   const isAuthenticated = authAPI.isAuthenticated();
@@ -14,16 +13,7 @@ function App() {
     authAPI.login();
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('🔄 Inicjalizacja WebSocket w App...');
-      webSocketService.connect();
-      webSocketService.debug()
-    }
-    return () => {
-      webSocketService.disconnect();
-    }
-  }, [isAuthenticated]);
+  useWebSocketConnect(); // this is custom hook for websocket connection
 
   const handleLogout = () => {
     authAPI.logout();

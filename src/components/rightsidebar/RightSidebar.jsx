@@ -3,7 +3,7 @@ import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { friendsAPI } from '../../api/friends';
 import { useNavigate } from 'react-router-dom';
-import  webSocketService  from '../../websockets/WebSocketService';
+import useWebSocketStatus from '../../hooks/websocketHooks/useWebSocketStatus';
 
 // Initial state for the sidebar
 const initialState = {
@@ -15,6 +15,7 @@ const initialState = {
     activity: 'Available',
     showStatusMenu: false
   },
+  friends: [],
   isMenuOpen: false,
   selectedUser: null,
 };
@@ -25,8 +26,7 @@ const reducer = (state, action) => {
     case 'SET_FRIENDS':
       return {
         ...state,
-        activeUsers: action.payload.filter(friend => friend.status !== 'offline'),
-        offlineUsers: action.payload.filter(friend => friend.status === 'offline')
+        friends: action.payload
       };
     case 'TOGGLE_MENU':
       return { ...state, isMenuOpen: !state.isMenuOpen, selectedUser: null };
@@ -56,47 +56,11 @@ const reducer = (state, action) => {
                    action.payload === 'dnd' ? 'Do Not Disturb' : 'Offline'
         }
       };
-    case 'UPDATE_USER_STATUS':
-      console.log('Reducer: UPDATE_USER_STATUS', action.payload);
-      
-      // Znajdź użytkownika w obu listach
-      const userInActive = state.activeUsers.find(user => user.id === action.payload.userId);
-      const userInOffline = state.offlineUsers.find(user => user.id === action.payload.userId);
-      
-      let newActiveUsers = [...state.activeUsers];
-      let newOfflineUsers = [...state.offlineUsers];
-
-      if (action.payload.isOnline) {
-        // Jeśli użytkownik jest online, przenieś go do aktywnych
-        if (userInOffline) {
-          newOfflineUsers = newOfflineUsers.filter(user => user.id !== action.payload.userId);
-          newActiveUsers.push({...userInOffline, status: 'online'});
-        } else if (userInActive) {
-          newActiveUsers = newActiveUsers.map(user =>
-            user.id === action.payload.userId ? {...user, status: 'online'} : user
-          );
-        }
-      } else {
-        // Jeśli użytkownik jest offline, przenieś go do offline
-        if (userInActive) {
-          newActiveUsers = newActiveUsers.filter(user => user.id !== action.payload.userId);
-          newOfflineUsers.push({...userInActive, status: 'offline'});
-        } else if (userInOffline) {
-          newOfflineUsers = newOfflineUsers.map(user =>
-            user.id === action.payload.userId ? {...user, status: 'offline'} : user
-          );
-        }
-      }
-
-      return {
-        ...state,
-        activeUsers: newActiveUsers,
-        offlineUsers: newOfflineUsers
-      };
     default:
       return state;
   }
 };
+
 
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
   const navigate = useNavigate();
@@ -125,40 +89,13 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
   const userMenuRef = useRef(null);
-  const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const updateUserStatus = useCallback((userId, isOnline) => {
-    console.log('Aktualizacja statusu użytkownika:', userId, isOnline);
-    
-    dispatch({
-      type: 'UPDATE_USER_STATUS',
-      payload: {
-        userId: userId,
-        isOnline: isOnline
-      }
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    const handleStatusUpdate = (data) => {
-      console.log('Otrzymano aktualizację statusu:', data);
-      
-      // Sprawdź, czy dane zawierają potrzebne informacje
-      if (data.user_id && data.is_online !== undefined) {
-        console.log('Aktualizuję status dla użytkownika:', data.user_id, data.is_online);
-        updateUserStatus(data.user_id, data.is_online);
-      }
-    };
-
-    // Subskrybuj aktualizacje statusu i początkowe statusy
-
-    return () => {
-      unsubscribeStatus();
-      unsubscribeInitialStatuses();
-    };
-  }, [updateUserStatus]);
+  // Implementacja useWebSocketStatus
+  const { onlineUsers } = useWebSocketStatus();
+  const  activeUsers = state.friends.filter(friend => onlineUsers.has(friend.id));
+  const  offlineUsers = state.friends.filter(friend => !onlineUsers.has(friend.id));
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -185,7 +122,6 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
         }
 
         const data = await friendsAPI.getFriends(user.id);
-        setFriends(data || []);
         dispatch({ type: 'SET_FRIENDS', payload: data || [] });
       } catch (error) {
         console.error('Failed to fetch friends:', error);
@@ -430,9 +366,9 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
             {renderUserProfile()}
           </div>
           <h2 className="text-gray-400 uppercase text-xs font-bold mb-4 tracking-wider">Active Friends — {state.activeUsers.length}</h2>
-          <div className="space-y-2">{state.activeUsers.map(renderUser)}</div>
+          <div className="space-y-2">{activeUsers.map(renderUser)}</div>
           <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {state.offlineUsers.length}</h2>
-          <div className="space-y-2">{state.offlineUsers.map(renderUser)}</div>
+          <div className="space-y-2">{offlineUsers.map(renderUser)}</div>
         </div>
       </div>
     </>
