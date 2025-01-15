@@ -3,6 +3,7 @@ import UserMobileMenu from './UserMobileMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { friendsAPI } from '../../api/friends';
 import { useNavigate } from 'react-router-dom';
+import  webSocketService  from '../../websockets/WebSocketService';
 
 // Initial state for the sidebar
 const initialState = {
@@ -151,13 +152,11 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
       }
     };
 
-    // Subskrybuj aktualizacje statusu
-    
-    const unsubscribe = webSocketService.subscribeToStatus(handleStatusUpdate);
-    
+    // Subskrybuj aktualizacje statusu i początkowe statusy
 
     return () => {
-      unsubscribe();
+      unsubscribeStatus();
+      unsubscribeInitialStatuses();
     };
   }, [updateUserStatus]);
 

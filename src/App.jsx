@@ -4,27 +4,26 @@ import MainApp from './MainApp';
 import LandingPage from './components/landing/LandingPage';
 import { authAPI } from './api/auth';
 import { useEffect } from 'react';
-import { webSocketService } from './websockets/WebSocketService';
+import webSocketService from './websockets/WebSocketService';
 
 function App() {
   const isAuthenticated = authAPI.isAuthenticated();
 
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      console.log('🔄 Inicjalizacja WebSocket w App...');
-      webSocketService.connect();
-    }
-
-    // Cleanup przy odmontowaniu
-    return () => {
-      webSocketService.disconnect();
-    };
-  }, []); // Pusty array zależności - uruchomi się tylko raz przy montowaniu
 
   const handleLogin = () => {
-    window.location.reload();
+    authAPI.login();
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('🔄 Inicjalizacja WebSocket w App...');
+      webSocketService.connect();
+      webSocketService.debug()
+    }
+    return () => {
+      webSocketService.disconnect();
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     authAPI.logout();

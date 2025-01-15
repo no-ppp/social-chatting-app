@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {webSocketService} from '../websockets/WebSocketService'
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
@@ -142,11 +141,8 @@ export const authAPI = {
 
                 // Ustaw token w axiosInstance
                 axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+            
                 
-                // Poczekaj chwilę przed połączeniem WebSocket
-                
-                console.log('Próba połączenia WebSocket po zalogowaniu...');
-                webSocketService.connect();
                 
                 
                 return {
@@ -177,7 +173,6 @@ export const authAPI = {
                 localStorage.removeItem('refresh_token');
                 localStorage.removeItem('user');
                 localStorage.clear(); // dla pewności czyścimy wszystko
-                webSocketService.disconnect();
                 // Czyszczenie headers w axiosInstance
                 delete axiosInstance.defaults.headers.common['Authorization'];
                 axiosInstance.defaults.headers.common = {
