@@ -38,6 +38,7 @@ const ProfileDashboard = () => {
     const { user, addFriend, loading, error, isFriend, requestError } = state;
     const [hasPendingRequest, setHasPendingRequest] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
+    
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -144,6 +145,7 @@ const ProfileDashboard = () => {
             console.error('Failed to remove friend:', error);
         }
     };
+    
 
     if (loading) {
         return (

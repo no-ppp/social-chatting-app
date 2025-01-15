@@ -222,7 +222,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   // Render individual user component
   const renderUser = (user) => {
     // Sprawdzamy status użytkownika z WebSocketService
-    const userStatus = user.status;
+    const userStatus = onlineUsers.has(user.id) ? 'online' : 'offline';
 
     return (
         <div 
