@@ -4,14 +4,13 @@ import MainApp from './MainApp';
 import LandingPage from './components/landing/LandingPage';
 import { authAPI } from './api/auth';
 import useWebSocketConnect from './hooks/websocketHooks/useWebSocketConnect';
+import { Provider } from 'react-redux';
+import store from './store/store';
 
 function App() {
   const isAuthenticated = authAPI.isAuthenticated();
 
-
-  const handleLogin = () => {
-    authAPI.login();
-  };
+  
 
   useWebSocketConnect(); // this is custom hook for websocket connection
 
@@ -20,8 +19,9 @@ function App() {
   };
 
   return (
-    <Router>
-      <Routes>
+    <Provider store={store}>
+      <Router>
+        <Routes>
         <Route 
           path="/" 
           element={
@@ -38,7 +38,7 @@ function App() {
             isAuthenticated ? (
               <Navigate to="/app" replace />
             ) : (
-              <LoginPage onLogin={handleLogin} />
+              <LoginPage />
             )
           } 
         />
@@ -52,9 +52,10 @@ function App() {
             )
           }
         />
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/app" : "/"} replace />} />
-      </Routes>
-    </Router>
+          <Route path="*" element={<Navigate to={isAuthenticated ? "/app" : "/"} replace />} />
+        </Routes>
+      </Router>
+    </Provider>
   );
 }
 

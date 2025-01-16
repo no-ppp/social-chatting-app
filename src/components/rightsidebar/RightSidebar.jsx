@@ -1,5 +1,5 @@
 import { useReducer, useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import UserMobileMenu from './UserMobileMenu';
+import UserMenu from './UserMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { useNavigate } from 'react-router-dom';
 import useWebSocketStatus from '../../hooks/websocketHooks/useWebSocketStatus';
@@ -251,7 +251,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
                     onClick={(e) => e.stopPropagation()}
                     className="absolute z-[100]"
                 >
-                    <UserMobileMenu
+                    <UserMenu
                         user={{...user, status: userStatus}}
                         position={{ x: 0, y: '100%' }}
                         seeProfileHandler={() => {

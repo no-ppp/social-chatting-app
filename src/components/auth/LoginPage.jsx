@@ -1,191 +1,72 @@
-import { useReducer } from 'react';
-import { authAPI } from '../../api/auth';
-import AnimatedBackground from '../common/AnimatedBackground';
+import { useSelector, useDispatch } from 'react-redux';
+import { setLoginMode, setResetMode, updateFormData, setRegistrationErrors, togglePassword, toggleConfirmPassword, loginUser, resetForm } from '../../store/slices/authSlice';
+import AnimatedBackground from '../common/AnimatedBackground'
 
-const ACTIONS = {
-  SET_LOGIN_MODE: 'SET_LOGIN_MODE',
-  SET_FORM_DATA: 'SET_FORM_DATA', 
-  SET_ERROR: 'SET_ERROR',
-  SET_LOADING: 'SET_LOADING',
-  RESET_FORM: 'RESET_FORM',
-  SET_RESET_MODE: 'SET_RESET_MODE',
-  TOGGLE_PASSWORD: 'TOGGLE_PASSWORD',
-  TOGGLE_CONFIRM_PASSWORD: 'TOGGLE_CONFIRM_PASSWORD',
-  SET_REGISTRATION_ERRORS: 'SET_REGISTRATION_ERRORS'
-};
 
-const initialState = {
-  isLoginMode: true,
-  isResetMode: false,
-  formData: {
-    email: '',
-    password: '',
-    username: '',
-    confirmPassword: '',
-  },
-  error: '',
-  registrationErrors: {
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  },
-  isLoading: false,
-  showPassword: false,
-  showConfirmPassword: false
-};
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case ACTIONS.SET_LOGIN_MODE:
-      return {
-        ...state,
-        isLoginMode: action.payload,
-        isResetMode: false,
-        registrationErrors: initialState.registrationErrors
-      };
-    case ACTIONS.SET_RESET_MODE:
-      return {
-        ...state,
-        isResetMode: action.payload,
-        isLoginMode: !action.payload,
-        registrationErrors: initialState.registrationErrors
-      };
-    case ACTIONS.SET_FORM_DATA:
-      return {
-        ...state,
-        formData: {
-          ...state.formData,
-          [action.payload.name]: action.payload.value
-        },
-        registrationErrors: {
-          ...state.registrationErrors,
-          [action.payload.name]: ''
-        }
-      };
-    case ACTIONS.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload
-      };
-    case ACTIONS.SET_REGISTRATION_ERRORS:
-      return {
-        ...state,
-        registrationErrors: {
-          ...state.registrationErrors,
-          ...action.payload
-        }
-      };
-    case ACTIONS.SET_LOADING:
-      return {
-        ...state,
-        isLoading: action.payload
-      };
-    case ACTIONS.RESET_FORM:
-      return {
-        ...state,
-        formData: initialState.formData,
-        error: '',
-        registrationErrors: initialState.registrationErrors
-      };
-    case ACTIONS.TOGGLE_PASSWORD:
-      return {
-        ...state,
-        showPassword: !state.showPassword
-      };
-    case ACTIONS.TOGGLE_CONFIRM_PASSWORD:
-      return {
-        ...state,
-        showConfirmPassword: !state.showConfirmPassword
-      };
-    default:
-      return state;
-  }
-};
-
-const LoginPage = ({ onLogin, onRegister }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { isLoginMode, isResetMode, formData, error, registrationErrors, isLoading, showPassword, showConfirmPassword } = state;
-
-  const validateRegistrationForm = () => {
-    const errors = {};
-    
-    if (!formData.username) {
-      errors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
-      errors.username = 'Username must be at least 3 characters';
-    }
-
-    if (!formData.email) {
-      errors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Email is invalid';
-    }
-
-    if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
-    return errors;
-  };
+const LoginPage = () => {
+  const dispatch = useDispatch();
+  const { 
+      isLoginMode, 
+      isResetMode, 
+      formData,
+      error,
+      registrationErrors, 
+      isLoading, 
+      showPassword, 
+      showConfirmPassword 
+    } = useSelector(state => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch({ type: ACTIONS.SET_ERROR, payload: '' });
-    dispatch({ type: ACTIONS.SET_LOADING, payload: true });
-
+    
     try {
-        if (isResetMode) {
-            // TODO: Implement reset password functionality
-            dispatch({ type: ACTIONS.SET_ERROR, payload: 'Password reset link has been sent to your email' });
-            return;
-        }
+      if (isResetMode) {
+        // TODO: Implement reset password functionality
+        return;
+      }
 
-        if (!isLoginMode) {
-            const validationErrors = validateRegistrationForm();
-            if (Object.keys(validationErrors).length > 0) {
-                dispatch({ type: ACTIONS.SET_REGISTRATION_ERRORS, payload: validationErrors });
-                throw new Error('Please fix the form errors');
-            }
-            
-            throw new Error('Registration not implemented yet');
+      if (!isLoginMode) {
+        const validationErrors = validateRegistrationForm();
+        if (Object.keys(validationErrors).length > 0) {
+          dispatch(setRegistrationErrors(validationErrors));
+          return;
         }
+        // TODO: Implement registration
+        return;
+      }
 
-        
-        const response = await authAPI.login(formData.email, formData.password);
-        
-        
-        if (response) {
-            window.location.href = '/app'; 
-        }
+      // Logowanie
+      const result = await dispatch(loginUser({
+        email: formData.email,
+        password: formData.password
+      })).unwrap();
+
+      if (result) {
+        // Przekierowanie zostanie obsłużone przez extraReducers w authSlice
+        // window.location.href = '/app';
+      }
     } catch (error) {
-        dispatch({ type: ACTIONS.SET_ERROR, payload: error.message || 'Login failed' });
-    } finally {
-        dispatch({ type: ACTIONS.SET_LOADING, payload: false });
+      // Błędy są już obsługiwane przez extraReducers w authSlice
+      console.error('Login error:', error);
     }
   };
 
   const handleChange = (e) => {
-    dispatch({
-      type: ACTIONS.SET_FORM_DATA,
-      payload: { name: e.target.name, value: e.target.value }
-    });
+    dispatch(updateFormData({ 
+      name: e.target.name, 
+      value: e.target.value 
+    }));
   };
 
   const toggleMode = () => {
-    dispatch({ type: ACTIONS.SET_LOGIN_MODE, payload: !isLoginMode });
-    dispatch({ type: ACTIONS.RESET_FORM });
+    dispatch(setLoginMode(!isLoginMode));
+    dispatch(resetForm());
   };
 
   const toggleResetMode = () => {
-    dispatch({ type: ACTIONS.SET_RESET_MODE, payload: !isResetMode });
-    dispatch({ type: ACTIONS.RESET_FORM });
+    dispatch(setResetMode(!isResetMode));
+    dispatch(resetForm());
   };
 
   return (
@@ -276,7 +157,7 @@ const LoginPage = ({ onLogin, onRegister }) => {
                     />
                     <button
                       type="button"
-                      onClick={() => dispatch({ type: ACTIONS.TOGGLE_PASSWORD })}
+                      onClick={() => dispatch(togglePassword())}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
                     >
                       {showPassword ? (
@@ -314,7 +195,7 @@ const LoginPage = ({ onLogin, onRegister }) => {
                     />
                     <button
                       type="button"
-                      onClick={() => dispatch({ type: ACTIONS.TOGGLE_CONFIRM_PASSWORD })}
+                      onClick={() => dispatch(toggleConfirmPassword())}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80"
                     >
                       {showConfirmPassword ? (

@@ -1,7 +1,7 @@
 import { useReducer, useRef } from 'react';
 import EmojiPicker from './EmojiComponent';
 import GifPicker from 'gif-picker-react';
-import UserMenu from '../rightsidebar/UserMobileMenu';
+import UserMenu from '../rightsidebar/UserMenu';
 import useClickOutside from '../../hooks/useClickOutside';
 
 // Action types
