@@ -4,13 +4,20 @@ import LeftSidebar from './components/leftsidebar/LeftSidebar';
 import RightSidebar from './components/rightsidebar/RightSidebar';
 import Chat from './components/features/Chat';
 import ProfileDashboard from './components/profile/ProfileDashboard';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { fetchFriends } from './store/slices/friendSlice';
 import { Provider } from 'react-redux';
 import store from './store/store';
 
 const MainApp = ({ onLogout }) => {
     const [selectedChannel, setSelectedChannel] = useState(null);
     const [selectedServer, setSelectedServer] = useState(null);
-
+    const reduxDispatch = useDispatch();
+    useEffect(() => {
+        reduxDispatch(fetchFriends());
+    }, [reduxDispatch]);
+    
     return (
         <Provider store={store}>
         <div className="flex h-screen bg-discord-gray">

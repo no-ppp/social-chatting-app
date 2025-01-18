@@ -13,15 +13,7 @@ import {
 
 // Initial state for the sidebar
 const initialState = {
-  activeUsers: [],
-  offlineUsers: [],
-  userProfile: {
-    username: 'User',
-    status: 'online',
-    activity: 'Available',
-    showStatusMenu: false
-  },
-  friends: [],
+  userProfile: getUserFromLocalStorage(),
   isMenuOpen: false,
   selectedUser: null,
 };
@@ -54,21 +46,16 @@ const uiReducer = (state, action) => {
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
   const navigate = useNavigate();
   
-  const reduxDispatch = useDispatch();
+  
   const friends = useSelector(selectAllFriends);
-  useEffect(() => {
-    reduxDispatch(fetchFriends());
-  }, [reduxDispatch]);
   
 
   // Inicjalizacja stanu z bezpiecznym parsowaniem
   const [state, dispatch] = useReducer(uiReducer, {
     ...initialState,
-    userProfile: {
-      ...initialState.userProfile,
-      ...(getUserFromLocalStorage() || {}),
+
     }
-  });
+  );
 
   const menuRef = useRef(null);
   const statusMenuRef = useRef(null);
@@ -102,8 +89,6 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const getStatusColor = (status) => {
     const statusColors = {
       online: 'bg-green-500',
-      idle: 'bg-yellow-500', 
-      dnd: 'bg-red-500',
       offline: 'bg-gray-500',
     };
     return statusColors[status] || statusColors.offline;
@@ -138,42 +123,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   // Render user profile status menu
   const renderStatusMenu = () => (
     <div ref={statusMenuRef} className="absolute top-full left-0 mt-2 w-48 bg-discord-dark rounded-lg shadow-lg p-2 status-menu z-50">
-      <button 
-        onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'online' })}
-        className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
-        type="button"
-        data-close-button
-      >
-        <div className={`w-3 h-3 rounded-full ${getStatusColor('online')} mr-2`}></div>
-        <span className="text-white">Online</span>
-      </button>
-      <button 
-        onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'idle' })}
-        className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
-        type="button"
-        data-close-button
-      >
-        <div className={`w-3 h-3 rounded-full ${getStatusColor('idle')} mr-2`}></div>
-        <span className="text-white">Idle</span>
-      </button>
-      <button 
-        onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'dnd' })}
-        className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
-        type="button"
-        data-close-button
-      >
-        <div className={`w-3 h-3 rounded-full ${getStatusColor('dnd')} mr-2`}></div>
-        <span className="text-white">Do Not Disturb</span>
-      </button>
-      <button 
-        onClick={() => dispatch({ type: 'SET_USER_STATUS', payload: 'offline' })}
-        className="w-full flex items-center p-2 hover:bg-gray-700 rounded-lg"
-        type="button"
-        data-close-button
-      >
-        <div className={`w-3 h-3 rounded-full ${getStatusColor('offline')} mr-2`}></div>
-        <span className="text-white">Offline</span>
-      </button>
+      
       <div className="border-t border-gray-700 my-2"></div>
       <button 
         onClick={() => dispatch({ type: 'OPEN_SETTINGS' })}
@@ -316,11 +266,11 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
               {renderUserProfile()}
             </div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-gray-400 uppercase text-xs font-bold tracking-wider">Active Friends — {state.activeUsers.length}</h2>
+              <h2 className="text-gray-400 uppercase text-xs font-bold tracking-wider">Active Friends — {activeUsers.length}</h2>
             </div>
-            <div className="space-y-2">{state.activeUsers.map(renderUser)}</div>
-            <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {state.offlineUsers.length}</h2>
-            <div className="space-y-2">{state.offlineUsers.map(renderUser)}</div>
+            <div className="space-y-2">{activeUsers.map(renderUser)}</div>
+            <h2 className="text-gray-400 uppercase text-xs font-bold mt-6 mb-2 tracking-wider">Offline — {offlineUsers.length}</h2>
+            <div className="space-y-2">{offlineUsers.map(renderUser)}</div>
           </div>
         </div>
       </div>

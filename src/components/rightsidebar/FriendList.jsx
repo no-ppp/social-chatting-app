@@ -1,3 +1,14 @@
+import { selectAllFriends } from '../../store/slices/friendSlice';
+import { UserMobileMenu } from '../features/UserMobileMenu';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+
+
+
+const friends = useSelector(selectAllFriends);
+
+
+
 const renderUser = (user) => {
     const userStatus = onlineUsers.has(user.id) ? 'online' : 'offline';
 
