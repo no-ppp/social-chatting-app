@@ -2,6 +2,8 @@ import { useReducer, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { usersAPI } from '../../api/users';
 import { friendsAPI } from '../../api/friends';
+import { useDispatch } from 'react-redux';
+import { fetchFriends } from '../../store/slices/friendSlice';
 
 
 const initialState = {
@@ -33,6 +35,7 @@ function reducer(state, action) {
 }
 
 const ProfileDashboard = () => {
+    const reduxDispatch = useDispatch();
     const { userId } = useParams();
     const [state, dispatch] = useReducer(reducer, initialState);
     const { user, addFriend, loading, error, isFriend, requestError } = state;
@@ -112,6 +115,7 @@ const ProfileDashboard = () => {
             await friendsAPI.sendFriendRequest(user.id);
             dispatch({ type: 'SET_ADD_FRIEND', payload: true });
             dispatch({ type: 'SET_REQUEST_ERROR', payload: null });
+            reduxDispatch(fetchFriends());
         } catch (error) {
             console.error('Failed to send friend request:', error);
             dispatch({ type: 'SET_REQUEST_ERROR', payload: 'You already sent a friend request to this user' });
@@ -123,6 +127,7 @@ const ProfileDashboard = () => {
             await friendsAPI.acceptFriendRequest(userId);
             setHasPendingRequest(false);
             dispatch({ type: 'SET_IS_FRIEND', payload: true });
+            reduxDispatch(fetchFriends());
         } catch (error) {
             console.error('Failed to accept friend request:', error);
         }
@@ -141,6 +146,7 @@ const ProfileDashboard = () => {
         try {
             await friendsAPI.deleteFriendRequest(userId);
             dispatch({ type: 'SET_IS_FRIEND', payload: false });
+            reduxDispatch(fetchFriends());
         } catch (error) {
             console.error('Failed to remove friend:', error);
         }

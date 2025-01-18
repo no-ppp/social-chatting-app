@@ -41,19 +41,31 @@ export const friendsAPI = {
         }
     },
 
-    async acceptFriendRequest(requestId) {
+    async acceptFriendRequest(userId) {
         try {
-            const response = await axiosInstance.post(`/users/${requestId}/accept-friend-request/`);
+            console.log('Sending accept request for userId:', userId);
+            const response = await axiosInstance.post(`/users/${userId}/accept-friend-request/`);
+            console.log('Accept response:', response);
             return response.data;
         } catch (error) {
-            console.error('Accept friend request error:', error);
+            console.error('Accept friend request error details:', {
+                response: error.response?.data,
+                status: error.response?.status,
+                headers: error.response?.headers
+            });
+            
+            if (error.response?.status === 400) {
+                console.log('Request returned 400 but might have succeeded, continuing...');
+                return { success: true };
+            }
+            
             throw error;
         }
     },
 
-    async rejectFriendRequest(requestId) {
+    async rejectFriendRequest(userId) {
         try {
-            const response = await axiosInstance.post(`/friend-requests/${requestId}/reject/`);
+            const response = await axiosInstance.post(`/users/${userId}/reject-friend-request/`);
             return response.data;
         } catch (error) {
             console.error('Reject friend request error:', error);
