@@ -4,12 +4,15 @@ import LeftSidebar from './components/leftsidebar/LeftSidebar';
 import RightSidebar from './components/rightsidebar/RightSidebar';
 import Chat from './components/features/Chat';
 import ProfileDashboard from './components/profile/ProfileDashboard';
+import { Provider } from 'react-redux';
+import store from './store/store';
 
 const MainApp = ({ onLogout }) => {
     const [selectedChannel, setSelectedChannel] = useState(null);
     const [selectedServer, setSelectedServer] = useState(null);
 
     return (
+        <Provider store={store}>
         <div className="flex h-screen bg-discord-gray">
             <LeftSidebar 
                 selectedServer={selectedServer}
@@ -40,6 +43,7 @@ const MainApp = ({ onLogout }) => {
                 onLogout={onLogout}
             />
         </div>
+        </Provider>
     );
 };
 

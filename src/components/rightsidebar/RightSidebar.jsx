@@ -3,7 +3,13 @@ import UserMenu from './UserMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { useNavigate } from 'react-router-dom';
 import useWebSocketStatus from '../../hooks/websocketHooks/useWebSocketStatus';
-import useFetchFriends from '../../hooks/ApiHooks/useFetchFriends';
+import getUserFromLocalStorage from '../../utils/getUserFromLocalStorage';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  selectAllFriends,
+  fetchFriends,
+} from '../../store/slices/friendSlice';
+
 
 // Initial state for the sidebar
 const initialState = {
@@ -21,13 +27,8 @@ const initialState = {
 };
 
 // Reducer to handle state updates
-const reducer = (state, action) => {
+const uiReducer = (state, action) => {
   switch (action.type) {
-    case 'SET_FRIENDS':
-      return {
-        ...state,
-        friends: action.payload
-      };
     case 'TOGGLE_MENU':
       return { ...state, isMenuOpen: !state.isMenuOpen, selectedUser: null };
     case 'SET_SELECTED_USER':
@@ -44,18 +45,6 @@ const reducer = (state, action) => {
           showStatusMenu: !state.userProfile.showStatusMenu
         }
       };
-    case 'SET_USER_STATUS':
-      return {
-        ...state,
-        userProfile: {
-          ...state.userProfile,
-          status: action.payload,
-          showStatusMenu: false,
-          activity: action.payload === 'online' ? 'Available' : 
-                   action.payload === 'idle' ? 'Away' :
-                   action.payload === 'dnd' ? 'Do Not Disturb' : 'Offline'
-        }
-      };
     default:
       return state;
   }
@@ -65,38 +54,31 @@ const reducer = (state, action) => {
 const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, callHandler, onLogout}) => {
   const navigate = useNavigate();
   
-  // Bezpieczne pobieranie danych użytkownika
-  const getUserFromLocalStorage = () => {
-    try {
-      const userStr = localStorage.getItem('user');
-      if (!userStr) return null;
-      return JSON.parse(userStr);
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      return null;
-    }
-  };
+  const reduxDispatch = useDispatch();
+  const friends = useSelector(selectAllFriends);
+  useEffect(() => {
+    reduxDispatch(fetchFriends());
+  }, [reduxDispatch]);
+  
 
   // Inicjalizacja stanu z bezpiecznym parsowaniem
-  const [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(uiReducer, {
     ...initialState,
     userProfile: {
       ...initialState.userProfile,
       ...(getUserFromLocalStorage() || {}),
     }
   });
+
   const menuRef = useRef(null);
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
   const userMenuRef = useRef(null);
   
-
-  const { friends } = useFetchFriends(dispatch);
-  
   const { onlineUsers } = useWebSocketStatus();
   
-  const activeUsers = state.friends.filter(friend => onlineUsers.has(friend.id));
-  const offlineUsers = state.friends.filter(friend => !onlineUsers.has(friend.id));
+  const activeUsers = friends.filter(friend => onlineUsers.has(friend.id));
+  const offlineUsers = friends.filter(friend => !onlineUsers.has(friend.id));
 
 
 
