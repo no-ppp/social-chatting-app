@@ -47,8 +47,59 @@ const notificationSlice = createSlice({
     name: 'notifications',
     initialState,
     reducers: {
-        updateUnreadCount: (state) => {
-            state.unreadCount = state.notifications.filter(n => !n.is_read).length;
+        addNotification: (state, action) => {
+            console.log('💾 Adding notification:', action.payload);
+            const exists = state.notifications.some(n => n.id === action.payload.id);
+            if (!exists) {
+                state.notifications.unshift(action.payload);
+                if (!action.payload.is_read) {
+                    state.unreadCount += 1;
+                }
+            } else {
+                console.log('⚠️ Notification already exists:', action.payload.id);
+            }
+        },
+        updateNotification: (state, action) => {
+            const index = state.notifications.findIndex(n => n.id === action.payload.id);
+            if (index !== -1) {
+                const wasUnread = !state.notifications[index].is_read;
+                const isNowRead = action.payload.is_read;
+                state.notifications[index] = action.payload;
+                
+                if (wasUnread && isNowRead) {
+                    state.unreadCount = Math.max(0, state.unreadCount - 1);
+                }
+            }
+        },
+        removeNotification: (state, action) => {
+            const notification = state.notifications.find(n => n.id === action.payload);
+            if (notification && !notification.is_read) {
+                state.unreadCount = Math.max(0, state.unreadCount - 1);
+            }
+            state.notifications = state.notifications.filter(n => n.id !== action.payload);
+        },
+        clearNotifications: (state) => {
+            state.notifications = [];
+            state.unreadCount = 0;
+        },
+        markAsRead: (state, action) => {
+            const notification = state.notifications.find(n => n.id === action.payload);
+            if (notification && !notification.is_read) {
+                notification.is_read = true;
+                state.unreadCount = Math.max(0, state.unreadCount - 1);
+            }
+        },
+        markAllAsRead: (state) => {
+            state.notifications.forEach(notification => {
+                notification.is_read = true;
+            });
+            state.unreadCount = 0;
+        },
+        setLoading: (state, action) => {
+            state.loading = action.payload;
+        },
+        setError: (state, action) => {
+            state.error = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -95,9 +146,21 @@ const notificationSlice = createSlice({
     }
 });
 
+export const {
+    addNotification,
+    updateNotification,
+    removeNotification,
+    clearNotifications,
+    markAsRead,
+    markAllAsRead,
+    setLoading,
+    setError
+} = notificationSlice.actions;
+
+// Selektory
 export const selectAllNotifications = (state) => state.notifications.notifications;
+export const selectUnreadCount = (state) => state.notifications.unreadCount;
 export const selectLoading = (state) => state.notifications.loading;
 export const selectError = (state) => state.notifications.error;
-export const selectUnreadCount = (state) => state.notifications.unreadCount;
 
 export default notificationSlice.reducer;
