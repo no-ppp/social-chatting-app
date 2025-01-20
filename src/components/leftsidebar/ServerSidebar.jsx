@@ -124,7 +124,7 @@ const ServerSidebar = ({channelList, serverHandler, onClick, editServerHandler, 
       </div>
 
       <div className="flex flex-col items-center space-y-5 mt-auto mb-3">
-        {/* <Notifications /> */}
+        <Notifications />
 
         <div className="w-12 h-12 mt-3 rounded-[24px] bg-discord-gray hover:bg-discord-blue hover:rounded-[16px] cursor-pointer relative group flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl">
           <SearchBar />

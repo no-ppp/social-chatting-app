@@ -21,7 +21,7 @@ async (__, { rejectWithValue })=> {
 
 const initialState = {
     friends: [],
-    onlineUsers: [],
+    onlineUsers: new Set(),
     status: 'idle',
     error: null,
 }
@@ -30,45 +30,48 @@ const friendSlice = createSlice({
     name: 'friends',
     initialState,
     reducers: {
-        
-        setOlineUsers: (state, action) => {
-            state.onlineUsers = action.payload;
+        setOnlineUsers: (state, action) => {
+            console.log('💾 Setting online users:', action.payload);
+            state.onlineUsers = new Set(action.payload);
         },
         addOnlineUser: (state, action) => {
-            state.onlineUsers.add(action.payload);
+            console.log('➕ Adding online user:', action.payload);
+            const newSet = new Set(state.onlineUsers);
+            newSet.add(action.payload);
+            state.onlineUsers = newSet;
         },
         removeOnlineUser: (state, action) => {
-            state.onlineUsers.delete(action.payload);
-
+            console.log('➖ Removing online user:', action.payload);
+            const newSet = new Set(state.onlineUsers);
+            newSet.delete(action.payload);
+            state.onlineUsers = newSet;
         },
-
-        },
-        extraReducers: (builder) => {
-            builder
-            .addCase(fetchFriends.pending, (state) =>{
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchFriends.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.friends = action.payload;
-            })
-            .addCase(fetchFriends.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-            })
-        }
+    },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchFriends.pending, (state) =>{
+            state.status = 'loading';
+            state.error = null;
+        })
+        .addCase(fetchFriends.fulfilled, (state, action) => {
+            state.status = 'succeeded';
+            state.friends = action.payload;
+        })
+        .addCase(fetchFriends.rejected, (state, action) => {
+            state.status = 'failed';
+            state.error = action.payload;
+        })
     }
-);
+});
 
 export const selectAllFriends = (state) => state.friends.friends;
 export const selectFriendStatus = (state) => state.friends.status;
 export const selectFriendError = (state) => state.friends.error;
+export const selectOnlineUsers = (state) => state.friends.onlineUsers;
 export const selectOnlineFriends = (state) => 
-    state.friends.friends.filter(friend => state.friends.onlineUsers.had(friend.id));
-export const selectOfflineFriends = (state) =>
     state.friends.friends.filter(friend => state.friends.onlineUsers.has(friend.id));
-
+export const selectOfflineFriends = (state) =>
+    state.friends.friends.filter(friend => !state.friends.onlineUsers.has(friend.id));
 
 export const { setOnlineUsers, addOnlineUser, removeOnlineUser } = friendSlice.actions;
 

@@ -2,11 +2,11 @@ import { useReducer, useRef, useEffect, useState, useCallback, useMemo } from 'r
 import UserMenu from './UserMenu';
 import useClickOutside from '../../hooks/useClickOutside'; // this is custom hook for click outside -->src/hooks
 import { useNavigate } from 'react-router-dom';
-import useWebSocketStatus from '../../hooks/websocketHooks/useWebSocketStatus';
 import getUserFromLocalStorage from '../../utils/getUserFromLocalStorage';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   selectAllFriends,
+  selectOnlineUsers,
   fetchFriends,
 } from '../../store/slices/friendSlice';
 
@@ -48,6 +48,7 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   
   
   const friends = useSelector(selectAllFriends);
+  const onlineUsers = useSelector(selectOnlineUsers);
   
 
   // Inicjalizacja stanu z bezpiecznym parsowaniem
@@ -61,8 +62,6 @@ const RightSidebar = ({settingHandler, seeProfileHandler, sendMessageHandler, ca
   const statusMenuRef = useRef(null);
   const selectedUserRef = useRef(null);
   const userMenuRef = useRef(null);
-  
-  const { onlineUsers } = useWebSocketStatus();
   
   const activeUsers = friends.filter(friend => onlineUsers.has(friend.id));
   const offlineUsers = friends.filter(friend => !onlineUsers.has(friend.id));

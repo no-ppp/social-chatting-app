@@ -7,8 +7,10 @@ import ProfileDashboard from './components/profile/ProfileDashboard';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchFriends } from './store/slices/friendSlice';
+import { fetchNotifications } from './store/slices/notificationSlice';
 import { Provider } from 'react-redux';
 import store from './store/store';
+import { websocketActions } from './store/actions/websocketActions';
 
 const MainApp = ({ onLogout }) => {
     const [selectedChannel, setSelectedChannel] = useState(null);
@@ -16,6 +18,8 @@ const MainApp = ({ onLogout }) => {
     const reduxDispatch = useDispatch();
     useEffect(() => {
         reduxDispatch(fetchFriends());
+        reduxDispatch(fetchNotifications());
+        reduxDispatch(websocketActions.connect());
     }, [reduxDispatch]);
     
     return (
