@@ -4,11 +4,26 @@ A Discord-inspired web application built with React and Redux. Features real-tim
 
 ## 🌟 Core Features
 
+### Landing Page
+![Opis GIF-a](./src/assets/chat-app-1.gif)
+
+### Login Page
+![Opis GIF-a](./src/assets/chat-app-2.gif)
+
+### Single Server Page
+![Opis GIF-a](./src/assets/chat-app-3.gif)
+
+### Responsive Design
+![Opis GIF-a](./src/assets/chat-app-4.gif)
+
+
 ### Friend Management
 - Send friend requests (completed works with django-channels + redis)
+![Opis GIF-a](./src/assets/chat-gpt.gif)
 - Accept/reject friend requests (completed works with django-channels + redis)
 - View online status (completed works with django-channels + redis)
 - Remove friends (completed works with django-channels + redis)
+
 
 ### Real-time Chat
 - Send/receive messages instantly   (in development)
@@ -22,6 +37,8 @@ A Discord-inspired web application built with React and Redux. Features real-tim
 - Message notifications              (works with django-channels + redis)
 - Mark as read/unread                (works with django-channels + redis)
 - Clear notifications                (works with django-channels + redis)
+![Opis GIF-a](./src/assets/chat-app-5.gif)
+
 
 ### User Authentication      (works with django-rest-framework + jwt)
 - JWT-based authentication   (django-channels have custom middleware for this)
@@ -35,7 +52,7 @@ A Discord-inspired web application built with React and Redux. Features real-tim
 - Node.js 16+
 - npm or yarn
 - Modern web browser
-![Opis GIF-a](./src/assets/chat-app-1.gif)
+
 
 ## 🛠️ Technologies
 
