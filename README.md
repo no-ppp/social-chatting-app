@@ -35,6 +35,7 @@ A Discord-inspired web application built with React and Redux. Features real-tim
 - Node.js 16+
 - npm or yarn
 - Modern web browser
+![Opis GIF-a](./src/assets/chat-app-1.gif)
 
 ## 🛠️ Technologies
 
