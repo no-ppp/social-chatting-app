@@ -90,7 +90,7 @@ export default function Notifications() {
             <button 
                 className="relative p-2 hover:bg-gray-700 rounded-lg transition-colors"
                 onClick={() => setIsOpen(!isOpen)}
-                title="Powiadomienia"
+                title="Notifications"
             >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -105,13 +105,13 @@ export default function Notifications() {
             {isOpen && (
                 <div className="absolute left-full top-0 ml-2 w-80 bg-discord-dark rounded-lg shadow-lg max-h-[80vh] overflow-y-auto z-50">
                     <div className="sticky top-0 bg-discord-dark p-2 border-b border-gray-700 flex justify-between items-center">
-                        <h3 className="text-white font-medium">Powiadomienia</h3>
+                        <h3 className="text-white font-medium">Notifications</h3>
                         {notifications.length > 0 && (
                             <button 
                                 onClick={handleMarkAllAsRead}
                                 className="text-xs text-gray-400 hover:text-white transition-colors"
                             >
-                                Oznacz wszystkie jako przeczytane
+                                Mark all as read
                             </button>
                         )}
                     </div>
@@ -143,7 +143,7 @@ export default function Notifications() {
                                         <button
                                             onClick={(e) => handleRemoveNotification(e, notification.id)}
                                             className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white"
-                                            title="Usuń powiadomienie"
+                                            title="Delete notification"
                                         >
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -158,7 +158,7 @@ export default function Notifications() {
                             <svg className="w-12 h-12 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p>Brak powiadomień</p>
+                            <p>No notifications</p>
                         </div>
                     )}
                 </div>

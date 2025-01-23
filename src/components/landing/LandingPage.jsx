@@ -22,7 +22,7 @@ const LandingPage = () => {
             <div className="flex-shrink-0 group cursor-pointer">
               <div className="text-3xl font-bold relative overflow-hidden">
                 <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-300% bg-clip-text text-transparent animate-text-gradient inline-block transform group-hover:scale-110 transition-transform">
-                  DISCORD
+                  Chat-app
                 </span>
                 <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
               </div>
@@ -39,7 +39,7 @@ const LandingPage = () => {
                 onClick={() => navigate('/login')}
                 className="relative px-6 py-2.5 rounded-lg overflow-hidden group"
               >
-                <span className="relative z-10 text-black font-medium">Open Discord</span>
+                <span className="relative z-10 text-black font-medium">Open Chat-app</span>
                 <div className="absolute inset-0 bg-white transition-transform duration-300"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               </button>
@@ -88,7 +88,7 @@ const LandingPage = () => {
               className="group relative px-8 py-4 rounded-full bg-white text-[#0a0a0b] hover:bg-opacity-90 transition-all hover:scale-105 font-medium text-lg flex items-center justify-center overflow-hidden"
             >
               <span className="relative z-10 group-hover:text-white transition-colors duration-300">
-                Open Discord in your browser
+                Open Chat-app in your browser
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
@@ -104,7 +104,7 @@ const LandingPage = () => {
               {
                 icon: "🎮",
                 title: "Create an invite-only place",
-                description: "Discord servers are organized into topic-based channels where you can collaborate, share, and just talk about your day without clogging up a group chat.",
+                description: "Chat-appservers are organized into topic-based channels where you can collaborate, share, and just talk about your day without clogging up a group chat.",
                 gradient: "from-blue-400 to-purple-400"
               },
               {
@@ -166,7 +166,7 @@ const LandingPage = () => {
       <footer className="relative bg-[#0a0a0b] py-12">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
         <div className="max-w-7xl mx-auto px-4 text-center text-white/50">
-          <p>© 2024 Discord Clone. Created for educational purposes.</p>
+          <p>© 2024 Chat-app. Created for educational purposes.</p>
         </div>
       </footer>
     </div>

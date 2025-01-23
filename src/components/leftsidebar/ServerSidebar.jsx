@@ -132,8 +132,8 @@ const ServerSidebar = ({channelList, serverHandler, onClick, editServerHandler, 
           {/* Search tooltip */}
           <div className="absolute left-full ml-3 p-2 bg-black rounded-md text-white text-sm w-48 
             opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
-            <p className="font-bold mb-1">Szukaj</p>
-            <p className="text-gray-300 text-xs">Znajdź znajomego lub serwer</p>
+            <p className="font-bold mb-1">Search</p>
+            <p className="text-gray-300 text-xs">Find a friend or server</p>
           </div>
         </div>
 

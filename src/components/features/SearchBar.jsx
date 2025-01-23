@@ -132,19 +132,19 @@ const SearchBar = () => {
       {state.isOpen && !state.searchType && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div ref={searchRef} className="bg-discord-dark w-full max-w-md mx-4 rounded-lg shadow-lg border border-gray-700 p-4">
-            <h3 className="text-white text-lg font-semibold mb-4 text-center">Co chcesz wyszukać?</h3>
+            <h3 className="text-white text-lg font-semibold mb-4 text-center">What do you want to search for?</h3>
             <div className="flex gap-4">
               <button
                 onClick={() => dispatch({ type: ACTIONS.SET_SEARCH_TYPE, payload: 'friend' })}
                 className="flex-1 bg-discord-gray text-white py-3 rounded-md hover:bg-gray-600 transition-colors"
               >
-                Znajomego
+                Friend
               </button>
               <button
                 onClick={() => dispatch({ type: ACTIONS.SET_SEARCH_TYPE, payload: 'server' })}
                 className="flex-1 bg-discord-gray text-white py-3 rounded-md hover:bg-gray-600 transition-colors"
               >
-                Serwer
+                Server
               </button>
             </div>
           </div>
@@ -162,14 +162,14 @@ const SearchBar = () => {
                   type: ACTIONS.SET_SEARCH_QUERY, 
                   payload: e.target.value 
                 })}
-                placeholder={state.searchType === 'friend' ? "Wyszukaj znajomego..." : "Szukaj serwera..."}
+                placeholder={state.searchType === 'friend' ? "Find Friend..." : "Find Server..."}
                 className="w-full bg-discord-gray text-white placeholder-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-discord-gray"
               />
             </div>
             
             <div className="mt-4 max-h-[60vh] overflow-y-auto">
               {state.isLoading ? (
-                <div className="text-gray-400 text-sm py-2">Wyszukiwanie...</div>
+                <div className="text-gray-400 text-sm py-2">Searching...</div>
               ) : state.error ? (
                 <div className="text-red-500 text-sm py-2">{state.error}</div>
               ) : state.filteredUsers.length > 0 ? (
@@ -194,7 +194,7 @@ const SearchBar = () => {
                 ))
               ) : state.searchQuery ? (
                 <div className="text-gray-400 text-sm py-2">
-                  Brak wyników wyszukiwania
+                  No results found
                 </div>
               ) : null}
             </div>
@@ -204,13 +204,13 @@ const SearchBar = () => {
                 onClick={() => dispatch({ type: ACTIONS.RESET_SEARCH })}
                 className="flex-1 bg-discord-gray text-white py-2 rounded-md hover:bg-gray-600 transition-colors"
               >
-                Wróć
+                Back
               </button>
               <button
                 onClick={() => dispatch({ type: ACTIONS.CLOSE_SEARCH })}
                 className="flex-1 bg-discord-gray-light text-white py-2 rounded-md hover:bg-gray-600 transition-colors"
               >
-                Zamknij
+                Close
               </button>
             </div>
           </div>
