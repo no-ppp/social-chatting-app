@@ -1,6 +1,12 @@
-# Discord Clone - Frontend
+# Chat-app - Frontend
 
 A Discord-inspired web application built with React and Redux. Features real-time communication, friend management, and notifications.
+
+## Backend Django-Channels-Redis-ORM-JWT
+- This app is client side only, for the backend you can check the repo listed below
+- in this repo you can find the api documentation in the docs folder
+- when python manage.py runserver is running you can check the api at http://localhost:8000/api/redoc
+- More info https://github.com/no-ppp/discord-clone-backend
 
 ## 🌟 Core Features
 
@@ -19,10 +25,10 @@ A Discord-inspired web application built with React and Redux. Features real-tim
 
 ### Friend Management
 - Send friend requests (completed works with django-channels + redis)
-![Opis GIF-a](./src/assets/chat-gpt.gif)
 - Accept/reject friend requests (completed works with django-channels + redis)
 - View online status (completed works with django-channels + redis)
 - Remove friends (completed works with django-channels + redis)
+![Opis GIF-a](./src/assets/chat-gpt.gif)
 
 
 ### Real-time Chat
