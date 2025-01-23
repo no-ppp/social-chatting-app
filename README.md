@@ -97,7 +97,7 @@ The application uses WebSocket for:
 
 ## 📚 Documentation
 
-For more detailed information, please refer to the [Backend Documentation](https://github.com/your-backend-repo/docs).
+For more detailed information, please refer to the [Backend Documentation](https://github.com/no-ppp/discord-clone-backend/docs).
 
 ## 🔒 Authentication
 
@@ -122,6 +122,48 @@ The application is fully responsive with breakpoints:
 - [ ] Implement servers and channels
 - [ ] User permissions system
 - [ ] Extend notification system
+
+## 🔌 WebSocket Events
+
+### Status Updates
+```javascript
+{
+    type: 'status_update',
+    user_id: number,
+    status: 'online' | 'offline'
+}
+```
+
+### Notifications
+```javascript
+{
+    type: 'notification',
+    notification: {
+        id: number,
+        text: string,
+        created_at: string,
+        is_read: boolean,
+        notification_type: 'friend_request' | 'message'
+    }
+}
+
+for more info check the backend repo listed at the top of the README
+the api documentation is in the backend repo (docs folder)
+when python manage.py runserver is running you can check the api at http://localhost:8000/api/redoc
+```
+
+## 🚀 Available Scripts
+
+```bash
+npm run dev        # Start development server
+npm run build      # Build for production
+npm run preview    # Preview production build
+```
+
+## 🐛 Known Issues
+
+- WebSocket reconnection handling needs improvement
+- Mobile notifications might be delayed on background
 
 
 ## 📝 Notes
