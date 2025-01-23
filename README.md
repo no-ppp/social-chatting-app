@@ -69,22 +69,26 @@ Create a `.env` file in the root directory with the following variables:
 VITE_API_URL=http://localhost:8000
 ```
 
+## 📁 Project Structure
+
+```
 src/
-├── api/ # API requests
-├── components/ # React components
-│ ├── auth/ # Authentication components
-│ ├── features/ # Main features
-│ ├── leftsidebar/ # Left sidebar components
-│ └── rightsidebar/ # Right sidebar components
-├── store/ # Redux store
-│ ├── actions/ # Redux actions
-│ ├── middleware/ # Middleware (WebSocket)
-│ └── slices/ # Redux slices
-├── hooks/ # Custom hooks
-├── utils/ # Utility functions
-├── websockets/ # WebSocket configuration
-└── App.jsx # Main component (Landing page)
-|__ MainApp.jsx # Main application component (includes routing)
+├── api/                  # API requests
+├── components/           # React components
+│   ├── auth/            # Authentication components
+│   ├── features/        # Main features
+│   ├── leftsidebar/     # Left sidebar components
+│   └── rightsidebar/    # Right sidebar components
+├── store/               # Redux store
+│   ├── actions/         # Redux actions
+│   ├── middleware/      # Middleware (WebSocket)
+│   └── slices/          # Redux slices
+├── hooks/               # Custom hooks
+├── utils/               # Utility functions
+├── websockets/          # WebSocket configuration
+├── App.jsx              # Main component (Landing page)
+└── MainApp.jsx          # Main application component (includes routing)
+```
 
 
 ## 🔌 WebSocket
